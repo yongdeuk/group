@@ -1,0 +1,1490 @@
+<title>모둠 자리 배치판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --bg: #EEF1E9;
+    --surface: #FBFBF6;
+    --surface-2: #E3E8DA;
+    --ink: #23291F;
+    --ink-muted: #5B6357;
+    --accent: #2F6F62;
+    --accent-strong: #245A50;
+    --accent-ink: #FBFBF6;
+    --order-accent: #C08A2C;
+    --order-ink: #2A1D06;
+    --danger: #C1503A;
+    --border: #CFD6C2;
+    --empty-ink: #97A18A;
+    --shadow: 0 1px 2px rgba(35,41,31,0.06), 0 6px 16px rgba(35,41,31,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #171F1A;
+      --surface: #202B23;
+      --surface-2: #263229;
+      --ink: #ECEAdd;
+      --ink-muted: #9AA593;
+      --accent: #5FAE9B;
+      --accent-strong: #7BC1AF;
+      --accent-ink: #0E1A15;
+      --order-accent: #E0B563;
+      --order-ink: #241A05;
+      --danger: #E2836B;
+      --border: #37453A;
+      --empty-ink: #55624F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #171F1A;
+    --surface: #202B23;
+    --surface-2: #263229;
+    --ink: #ECEAdd;
+    --ink-muted: #9AA593;
+    --accent: #5FAE9B;
+    --accent-strong: #7BC1AF;
+    --accent-ink: #0E1A15;
+    --order-accent: #E0B563;
+    --order-ink: #241A05;
+    --danger: #E2836B;
+    --border: #37453A;
+    --empty-ink: #55624F;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', system-ui, -apple-system, 'Malgun Gothic', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .page{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .top-row{
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .top-left{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  h1{
+    font-family: 'Fredoka', 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.1rem);
+    margin: 2px 0 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .tabs{
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    width: fit-content;
+    box-shadow: var(--shadow);
+  }
+  .tab{
+    border: none;
+    background: transparent;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .tab.active{ background: var(--accent); color: var(--accent-ink); }
+  .tab:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .view{ display: flex; flex-direction: column; gap: 20px; }
+
+  .panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 14px 18px;
+    overflow-x: auto;
+  }
+  .panel, .order-scroll, .timer-settings{
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .panel::-webkit-scrollbar,
+  .order-scroll::-webkit-scrollbar,
+  .timer-settings::-webkit-scrollbar{
+    display: none;
+  }
+  .field{
+    display: flex;
+    align-items: center;
+    flex: none;
+    gap: 8px;
+  }
+  .field label{
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+  .stepper{
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .stepper button{
+    width: 32px;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font-size: 1.05rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+  }
+  .stepper button:hover{ background: var(--surface-2); }
+  .stepper input{
+    width: 54px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink);
+    -moz-appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+  .stepper input:focus{ outline: none; }
+
+  .divider{
+    width: 1px;
+    align-self: stretch;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  button.action{
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 9px 15px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  button.action:active{ transform: translateY(1px); }
+  button.action.primary{ background: var(--accent); color: var(--accent-ink); }
+  button.action.primary:hover{ filter: brightness(1.06); }
+  button.action.secondary{ background: transparent; color: var(--order-accent); border-color: var(--order-accent); }
+  button.action.secondary:hover{ background: color-mix(in srgb, var(--order-accent) 12%, transparent); }
+  button.action.large{ padding: 16px 40px; font-size: 1.18rem; border-radius: 14px; }
+  button.action.small{ padding: 6px 13px; font-size: 0.78rem; border-radius: 8px; }
+  button.action:focus-visible, .stepper button:focus-visible, .stepper input:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .stats{
+    margin-left: auto;
+    font-size: 0.86rem;
+    color: var(--ink-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .stats strong{ color: var(--ink); font-weight: 700; }
+
+  .board{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+  .podium{
+    background: var(--surface-2);
+    border: 4px double var(--accent);
+    border-radius: 10px;
+    padding: 10px 44px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    box-shadow: var(--shadow);
+  }
+  .podium span{ color: var(--accent); }
+
+  .floor-scroll{
+    width: 100%;
+    overflow: hidden;
+    padding: 4px 4px 12px;
+  }
+  .rows{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    min-width: max-content;
+    margin: 0 auto;
+  }
+  .row{
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+  .group-wrap{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .group{
+    display: grid;
+    grid-template-columns: repeat(2, 64px);
+    grid-template-rows: repeat(2, 78px);
+    gap: 8px;
+    padding: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .group.placeholder{
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--border);
+  }
+  .seat{
+    position: relative;
+    width: 64px;
+    height: 78px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.1s ease;
+  }
+  .seat.empty{
+    background: transparent;
+    border-style: dashed;
+    color: var(--empty-ink);
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .seat.selected{
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    box-shadow: 0 0 0 2px var(--accent) inset;
+  }
+  .seat.shuffling{
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .group-label{
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+  }
+  .group-label.ghost{ visibility: hidden; }
+
+  @media (prefers-reduced-motion: no-preference){
+    .seat.pop, .solo-seat.pop{
+      animation: pop 0.46s cubic-bezier(.34, 1.56, .64, 1) both;
+      animation-delay: var(--pop-delay, 0ms);
+    }
+    @keyframes pop{
+      0%{ transform: scale(0.4) rotate(-8deg); opacity: 0; }
+      55%{ transform: scale(1.14) rotate(3deg); opacity: 1; }
+      100%{ transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+  }
+
+  .legend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    justify-content: center;
+  }
+  .legend .item{ display: flex; align-items: center; gap: 7px; }
+  .legend .chip{
+    width: 16px; height: 16px; border-radius: 5px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700;
+    flex: none;
+  }
+  .hint{
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    text-align: center;
+    margin: 0;
+  }
+
+  .howto{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px dashed var(--accent);
+    border-radius: 12px;
+    padding: 14px 16px;
+    flex: 1 1 280px;
+    max-width: 420px;
+  }
+  .howto-step{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+  .howto-num{
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .solo-group{
+    display: grid;
+    grid-template-columns: repeat(2, 108px);
+    grid-template-rows: repeat(2, 108px);
+    gap: 12px;
+    padding: 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .solo-seat{
+    width: 108px;
+    height: 108px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  }
+  .solo-seat .num{
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--order-accent);
+    line-height: 1;
+  }
+  .solo-seat.current{
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    box-shadow: 0 0 0 2px var(--accent) inset;
+  }
+  .solo-seat.current .num{ color: var(--accent-strong); }
+  .solo-seat.done{
+    background: var(--surface-2);
+    border-color: var(--border);
+    opacity: 0.5;
+  }
+  .solo-seat.done .num{ color: var(--ink-muted); }
+
+  .order-scroll{
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 4px 8px;
+  }
+  .order-live{
+    display: flex;
+    gap: 24px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: max-content;
+    margin: 0 auto;
+  }
+  .solo-panel{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .timer-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 26px;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .timer-settings{
+    display: flex;
+    gap: 14px 22px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .timer-field{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .check{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .check input{
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .stepper.compact button{ width: 25px; font-size: 0.92rem; }
+  .stepper.compact input{ width: 32px; font-size: 0.88rem; }
+  .stepper.compact.duration input{ width: 27px; }
+  .stepper.compact .colon{ font-size: 0.88rem; font-weight: 700; color: var(--ink-muted); }
+  .stepper.disabled{ opacity: 0.4; }
+  .unit{ font-size: 0.8rem; color: var(--ink-muted); }
+  .timer-turn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .timer-turn .who{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+  }
+  .timer-turn .who .who-badge{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1.55rem;
+    box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .phase-pill{
+    display: inline-flex;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: transparent;
+    border: 1px solid var(--border);
+  }
+  .phase-pill.explain{ border-color: var(--accent); color: var(--accent-strong); }
+  .phase-pill.feedback{ border-color: var(--order-accent); color: var(--order-accent); }
+  .phase-pill.done{ color: var(--ink-muted); }
+
+  .timer-display{
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 3.6rem;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .timer-display.done{ color: var(--order-accent); }
+  .timer-display.urgent{ color: var(--danger); }
+  @media (prefers-reduced-motion: no-preference){
+    .timer-display.urgent{ animation: urgentBlink 0.9s ease-in-out infinite; }
+    @keyframes urgentBlink{
+      0%, 100%{ opacity: 1; }
+      50%{ opacity: 0.5; }
+    }
+  }
+
+  .timer-progress{
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .timer-progress-fill{
+    height: 100%;
+    width: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.25s linear;
+  }
+  .timer-progress-fill.feedback{ background: var(--order-accent); }
+  .timer-progress-fill.urgent{ background: var(--danger); }
+
+  .timer-controls{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .timer-controls-secondary{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button.action:disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .timer-meta{
+    font-size: 0.76rem;
+    color: var(--ink-muted);
+    text-align: center;
+    margin: 0;
+    white-space: nowrap;
+  }
+  .timer-desc-group{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .timer-desc{
+    font-size: 0.74rem;
+    color: var(--ink-muted);
+    text-align: center;
+    line-height: 1.5;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .sr-only{
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  @media (max-width: 560px){
+    .panel{ padding: 14px; }
+  }
+</style>
+
+<div class="page">
+  <div class="top-row">
+    <div class="top-left">
+      <h1>모둠 자리 배치판</h1>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" id="boardTab" role="tab" aria-selected="true" aria-controls="boardSection">자리 배치</button>
+        <button type="button" class="tab" id="orderTab" role="tab" aria-selected="false" aria-controls="orderSection">모둠별 발표</button>
+      </div>
+    </div>
+    <div class="howto">
+      <div class="howto-step"><span class="howto-num">1</span> <span id="howtoStep1">책상을 4인 모둠 대형으로 붙여주세요 🪑💨</span></div>
+      <div class="howto-step"><span class="howto-num">2</span> 아래에서 내 번호를 찾아 그 자리로 이동! 번호는 랜덤이라 억울해도 어쩔 수 없어요 😆</div>
+    </div>
+  </div>
+
+  <section class="view" id="boardSection" role="tabpanel" aria-labelledby="boardTab">
+    <div class="panel">
+      <div class="field">
+        <label for="totalInput">인원수</label>
+        <div class="stepper compact">
+          <button type="button" id="decBtn" aria-label="인원 1명 줄이기">−</button>
+          <input type="number" id="totalInput" min="1" max="60" value="28" aria-label="인원수" />
+          <button type="button" id="incBtn" aria-label="인원 1명 늘리기">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="groupSizeInput">한 모둠당 인원</label>
+        <div class="stepper compact">
+          <button type="button" id="groupSizeDecBtn" aria-label="한 모둠당 인원 줄이기">−</button>
+          <input type="number" id="groupSizeInput" min="1" max="8" value="4" aria-label="한 모둠당 인원" />
+          <button type="button" id="groupSizeIncBtn" aria-label="한 모둠당 인원 늘리기">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="colsInput">한 줄당 모둠 수</label>
+        <div class="stepper compact">
+          <button type="button" id="colsDecBtn" aria-label="한 줄당 모둠 수 줄이기">−</button>
+          <input type="number" id="colsInput" min="1" max="8" value="3" aria-label="한 줄당 모둠 수" />
+          <button type="button" id="colsIncBtn" aria-label="한 줄당 모둠 수 늘리기">+</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <button type="button" class="action primary" id="shuffleNumbersBtn">🔀 번호 랜덤 배치</button>
+      <button type="button" class="action secondary" id="resetNumbersBtn">초기화</button>
+      <div class="stats" id="statsText"></div>
+    </div>
+
+    <div class="board" id="mainBoard">
+      <div class="podium">🏫 <span>교탁</span></div>
+      <div class="floor-scroll">
+        <div class="rows" id="rowsContainer"></div>
+      </div>
+      <div class="legend">
+        <div class="item"><span class="chip">07</span> 학생 번호</div>
+      </div>
+      <p class="hint">발표 순서와 타이머는 “모둠별 발표” 탭에서 확인하세요.</p>
+    </div>
+  </section>
+
+  <section class="view" id="orderSection" role="tabpanel" aria-labelledby="orderTab" hidden>
+    <div class="board">
+      <div class="order-scroll"><div class="order-live">
+        <div class="solo-panel">
+          <button type="button" class="action primary" id="shuffleOrderBtn">🔀 발표 순서 랜덤 배치</button>
+          <div class="podium">🏫 <span>교탁</span></div>
+          <div class="solo-group" id="soloGroup"></div>
+        </div>
+
+        <div class="timer-card">
+          <div class="timer-turn">
+            <span class="phase-pill explain" id="phasePill">설명</span>
+            <div class="who" id="turnWho">1번째 발표자 · 앞줄 왼쪽</div>
+          </div>
+
+          <div class="timer-display" id="timerDisplay">5:00</div>
+          <div class="timer-progress"><div class="timer-progress-fill" id="timerFill"></div></div>
+
+          <div class="timer-controls">
+            <button type="button" class="action primary large" id="startPauseBtn">시작</button>
+            <div class="timer-controls-secondary">
+              <button type="button" class="action secondary small" id="prevPhaseBtn">이전 단계</button>
+              <button type="button" class="action secondary small" id="nextPhaseBtn">다음 단계</button>
+              <button type="button" class="action secondary small" id="resetTimerBtn">처음부터</button>
+            </div>
+          </div>
+
+          <div class="timer-settings">
+            <div class="timer-field">
+              <label class="check" for="explainEnabled" title="발표자가 다른 모둠원에게 내용을 설명하는 시간">
+                <input type="checkbox" id="explainEnabled" checked /> 설명
+              </label>
+              <div class="stepper compact duration" id="explainStepper">
+                <button type="button" id="explainDecBtn" aria-label="설명 시간 30초 줄이기">−</button>
+                <input type="number" id="explainMinInput" min="0" max="30" value="5" aria-label="설명 시간(분)" />
+                <span class="colon">:</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="explainSecInput" value="00" aria-label="설명 시간(초)" />
+                <button type="button" id="explainIncBtn" aria-label="설명 시간 30초 늘리기">+</button>
+              </div>
+            </div>
+            <div class="timer-field">
+              <label class="check" for="feedbackEnabled" title="다른 모둠원이 발표 내용에 질문하고 의견을 주는 시간">
+                <input type="checkbox" id="feedbackEnabled" checked /> 피드백
+              </label>
+              <div class="stepper compact duration" id="feedbackStepper">
+                <button type="button" id="feedbackDecBtn" aria-label="피드백 시간 30초 줄이기">−</button>
+                <input type="number" id="feedbackMinInput" min="0" max="30" value="2" aria-label="피드백 시간(분)" />
+                <span class="colon">:</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" id="feedbackSecInput" value="00" aria-label="피드백 시간(초)" />
+                <button type="button" id="feedbackIncBtn" aria-label="피드백 시간 30초 늘리기">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="timer-desc-group">
+            <p class="timer-desc">설명 — 발표자가 모둠원에게 설명해요</p>
+            <p class="timer-desc">피드백 — 모둠원이 질문·의견을 줘요</p>
+          </div>
+
+          <p class="timer-meta" id="timerMeta"></p>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+  <p class="sr-only" role="status" aria-live="polite" id="liveMsg"></p>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'modum-seating-v6';
+  var SEAT_W = 64, SEAT_H = 78;
+  var SOLO_SEAT = 108;
+
+  var howtoStep1 = document.getElementById('howtoStep1');
+  var totalInput = document.getElementById('totalInput');
+  var decBtn = document.getElementById('decBtn');
+  var incBtn = document.getElementById('incBtn');
+  var groupSizeInput = document.getElementById('groupSizeInput');
+  var groupSizeDecBtn = document.getElementById('groupSizeDecBtn');
+  var groupSizeIncBtn = document.getElementById('groupSizeIncBtn');
+  var colsInput = document.getElementById('colsInput');
+  var colsDecBtn = document.getElementById('colsDecBtn');
+  var colsIncBtn = document.getElementById('colsIncBtn');
+  var shuffleNumbersBtn = document.getElementById('shuffleNumbersBtn');
+  var resetNumbersBtn = document.getElementById('resetNumbersBtn');
+  var mainBoard = document.getElementById('mainBoard');
+  var shuffleOrderBtn = document.getElementById('shuffleOrderBtn');
+  var statsText = document.getElementById('statsText');
+  var rowsContainer = document.getElementById('rowsContainer');
+  var soloGroup = document.getElementById('soloGroup');
+  var liveMsg = document.getElementById('liveMsg');
+  var boardTab = document.getElementById('boardTab');
+  var orderTab = document.getElementById('orderTab');
+  var boardSection = document.getElementById('boardSection');
+  var orderSection = document.getElementById('orderSection');
+
+  var explainEnabledBox = document.getElementById('explainEnabled');
+  var explainStepper = document.getElementById('explainStepper');
+  var explainMinInput = document.getElementById('explainMinInput');
+  var explainSecInput = document.getElementById('explainSecInput');
+  var explainDecBtn = document.getElementById('explainDecBtn');
+  var explainIncBtn = document.getElementById('explainIncBtn');
+  var feedbackEnabledBox = document.getElementById('feedbackEnabled');
+  var feedbackStepper = document.getElementById('feedbackStepper');
+  var feedbackMinInput = document.getElementById('feedbackMinInput');
+  var feedbackSecInput = document.getElementById('feedbackSecInput');
+  var feedbackDecBtn = document.getElementById('feedbackDecBtn');
+  var feedbackIncBtn = document.getElementById('feedbackIncBtn');
+  var turnWho = document.getElementById('turnWho');
+  var phasePill = document.getElementById('phasePill');
+  var timerDisplay = document.getElementById('timerDisplay');
+  var timerFill = document.getElementById('timerFill');
+  var startPauseBtn = document.getElementById('startPauseBtn');
+  var prevPhaseBtn = document.getElementById('prevPhaseBtn');
+  var nextPhaseBtn = document.getElementById('nextPhaseBtn');
+  var resetTimerBtn = document.getElementById('resetTimerBtn');
+  var timerMeta = document.getElementById('timerMeta');
+
+  function clampTotal(n){
+    n = Math.round(n);
+    if(isNaN(n)) n = 28;
+    return Math.max(1, Math.min(60, n));
+  }
+
+  function clampCols(n){
+    n = Math.round(n);
+    if(isNaN(n)) n = 3;
+    return Math.max(1, Math.min(8, n));
+  }
+
+  function clampGroupSize(n){
+    n = Math.round(n);
+    if(isNaN(n)) n = 4;
+    return Math.max(1, Math.min(8, n));
+  }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function gridDims(n){
+    var cols = Math.ceil(Math.sqrt(n));
+    var rows = Math.ceil(n / cols);
+    return { cols: cols, rows: rows };
+  }
+
+  function numGroupsFor(total, groupSize){
+    return Math.ceil(total / groupSize);
+  }
+
+  function rowsFor(numGroups, cols){
+    var rows = [];
+    var remaining = numGroups;
+    while(remaining > 0){
+      var c = Math.min(cols, remaining);
+      rows.push(c);
+      remaining -= c;
+    }
+    if(rows.length === 0) rows.push(0);
+    return rows;
+  }
+
+  function randomizeNumbers(total, numGroups, groupSize){
+    var totalSeats = numGroups * groupSize;
+    var nums = shuffle(Array.from({length: total}, function(_, i){ return i + 1; }));
+    var seatNums = new Array(totalSeats).fill(null);
+    for(var i = 0; i < total; i++) seatNums[i] = nums[i];
+    return seatNums;
+  }
+
+  function sequentialNumbers(total, numGroups, groupSize){
+    var totalSeats = numGroups * groupSize;
+    var seatNums = new Array(totalSeats).fill(null);
+    for(var i = 0; i < total; i++) seatNums[i] = i + 1;
+    return seatNums;
+  }
+
+  function randomizeCommonOrder(n){
+    return shuffle(Array.from({length: n}, function(_, i){ return i + 1; }));
+  }
+
+  function sequentialOrder(n){
+    return Array.from({length: n}, function(_, i){ return i + 1; });
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var s = JSON.parse(raw);
+        if(s && typeof s.total === 'number' && Array.isArray(s.seatNums) && Array.isArray(s.commonOrder)){
+          return s;
+        }
+      }
+    }catch(e){}
+    return null;
+  }
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){}
+  }
+
+  function freshState(total){
+    var groupSize = 4;
+    var numGroups = numGroupsFor(total, groupSize);
+    return {
+      total: total,
+      cols: 3,
+      groupSize: groupSize,
+      seatNums: sequentialNumbers(total, numGroups, groupSize),
+      commonOrder: sequentialOrder(groupSize),
+      explainSeconds: 300,
+      feedbackSeconds: 120,
+      explainEnabled: true,
+      feedbackEnabled: true
+    };
+  }
+
+  var state = loadState() || freshState(28);
+  if(typeof state.cols !== 'number') state.cols = 3;
+  if(typeof state.groupSize !== 'number') state.groupSize = 4;
+  if(!Array.isArray(state.commonOrder) || state.commonOrder.length !== state.groupSize){
+    state.commonOrder = randomizeCommonOrder(state.groupSize);
+  }
+  if(typeof state.explainSeconds !== 'number'){
+    state.explainSeconds = typeof state.explainMin === 'number' ? state.explainMin * 60 : 300;
+  }
+  if(typeof state.feedbackSeconds !== 'number'){
+    state.feedbackSeconds = typeof state.feedbackMin === 'number' ? state.feedbackMin * 60 : 120;
+  }
+  delete state.explainMin;
+  delete state.feedbackMin;
+  if(typeof state.explainEnabled !== 'boolean') state.explainEnabled = true;
+  if(typeof state.feedbackEnabled !== 'boolean') state.feedbackEnabled = true;
+
+  // 새로 접속(새로고침 포함)할 때는 항상 1번부터 순서대로 배치된 상태로 시작합니다.
+  state.seatNums = sequentialNumbers(state.total, numGroupsFor(state.total, state.groupSize), state.groupSize);
+  state.commonOrder = sequentialOrder(state.groupSize);
+
+  function clampDurationSeconds(totalSec){
+    totalSec = Math.round(totalSec);
+    if(isNaN(totalSec)) totalSec = 60;
+    return Math.max(5, Math.min(1800, totalSec));
+  }
+  function secondsToParts(totalSec){
+    return { m: Math.floor(totalSec / 60), s: totalSec % 60 };
+  }
+  function pad2(n){
+    return (n < 10 ? '0' : '') + n;
+  }
+  function formatMinSec(totalSec){
+    var p = secondsToParts(totalSec);
+    return p.s === 0 ? (p.m + '분') : (p.m + '분 ' + p.s + '초');
+  }
+
+  totalInput.value = state.total;
+  colsInput.value = state.cols;
+  groupSizeInput.value = state.groupSize;
+  updateGroupSizeCopy();
+  (function(){
+    var ep = secondsToParts(state.explainSeconds);
+    explainMinInput.value = ep.m;
+    explainSecInput.value = pad2(ep.s);
+    var fp = secondsToParts(state.feedbackSeconds);
+    feedbackMinInput.value = fp.m;
+    feedbackSecInput.value = pad2(fp.s);
+  })();
+  explainEnabledBox.checked = state.explainEnabled;
+  feedbackEnabledBox.checked = state.feedbackEnabled;
+  explainStepper.classList.toggle('disabled', !state.explainEnabled);
+  feedbackStepper.classList.toggle('disabled', !state.feedbackEnabled);
+  explainMinInput.disabled = explainSecInput.disabled = explainDecBtn.disabled = explainIncBtn.disabled = !state.explainEnabled;
+  feedbackMinInput.disabled = feedbackSecInput.disabled = feedbackDecBtn.disabled = feedbackIncBtn.disabled = !state.feedbackEnabled;
+
+  var selectedSwapIdx = null;
+
+  function handleSeatSwap(idx){
+    var label = state.seatNums[idx] == null ? '빈자리' : (state.seatNums[idx] + '번');
+    if(selectedSwapIdx === null){
+      selectedSwapIdx = idx;
+      renderBoard(false);
+      liveMsg.textContent = label + ' 자리를 선택했습니다. 바꿀 자리를 더블클릭하세요.';
+      return;
+    }
+    if(selectedSwapIdx === idx){
+      selectedSwapIdx = null;
+      renderBoard(false);
+      liveMsg.textContent = '선택을 취소했습니다.';
+      return;
+    }
+    var tmp = state.seatNums[selectedSwapIdx];
+    state.seatNums[selectedSwapIdx] = state.seatNums[idx];
+    state.seatNums[idx] = tmp;
+    selectedSwapIdx = null;
+    saveState();
+    renderBoard(false);
+    liveMsg.textContent = '두 자리를 서로 바꿨습니다.';
+  }
+
+  rowsContainer.addEventListener('dblclick', function(e){
+    var seatEl = e.target.closest ? e.target.closest('.seat') : null;
+    if(!seatEl || seatEl.dataset.idx === undefined) return;
+    handleSeatSwap(parseInt(seatEl.dataset.idx, 10));
+  });
+
+  function prefersReducedMotion(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  function animateSlot(seatEl, finalNum, delayMs){
+    setTimeout(function(){
+      var ticks = 6 + Math.floor(Math.random() * 3);
+      var tick = 0;
+      seatEl.classList.add('shuffling');
+      var iv = setInterval(function(){
+        seatEl.textContent = 1 + Math.floor(Math.random() * Math.max(state.total, 9));
+        tick++;
+        if(tick >= ticks){
+          clearInterval(iv);
+          seatEl.textContent = finalNum;
+          seatEl.classList.remove('shuffling');
+          seatEl.classList.remove('pop');
+          void seatEl.offsetWidth;
+          seatEl.classList.add('pop');
+        }
+      }, 80);
+    }, delayMs);
+  }
+
+  function renderBoard(justShuffled, flicker){
+    var numGroups = numGroupsFor(state.total, state.groupSize);
+    var rows = rowsFor(numGroups, state.cols);
+    var dims = gridDims(state.groupSize);
+    var colsTemplate = 'repeat(' + dims.cols + ', ' + SEAT_W + 'px)';
+    var rowsTemplate = 'repeat(' + dims.rows + ', ' + SEAT_H + 'px)';
+    var doFlicker = flicker && !prefersReducedMotion();
+    var flickerQueue = [];
+
+    rowsContainer.innerHTML = '';
+    var groupIndex = 0;
+    var animIndex = 0;
+
+    rows.forEach(function(count){
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row';
+
+      for(var c = 0; c < state.cols; c++){
+        if(c >= count){
+          var placeholderWrap = document.createElement('div');
+          placeholderWrap.className = 'group-wrap';
+          var placeholderGroup = document.createElement('div');
+          placeholderGroup.className = 'group placeholder';
+          placeholderGroup.style.gridTemplateColumns = colsTemplate;
+          placeholderGroup.style.gridTemplateRows = rowsTemplate;
+          placeholderGroup.setAttribute('aria-hidden', 'true');
+          var placeholderLabel = document.createElement('div');
+          placeholderLabel.className = 'group-label ghost';
+          placeholderLabel.textContent = '빈 자리';
+          placeholderWrap.appendChild(placeholderGroup);
+          placeholderWrap.appendChild(placeholderLabel);
+          rowEl.appendChild(placeholderWrap);
+          continue;
+        }
+
+        var base = groupIndex * state.groupSize;
+        var wrap = document.createElement('div');
+        wrap.className = 'group-wrap';
+
+        var groupEl = document.createElement('div');
+        groupEl.className = 'group';
+        groupEl.style.gridTemplateColumns = colsTemplate;
+        groupEl.style.gridTemplateRows = rowsTemplate;
+
+        for(var s = 0; s < state.groupSize; s++){
+          var idx = base + s;
+          var num = state.seatNums[idx];
+          var seatEl = document.createElement('div');
+          seatEl.dataset.idx = idx;
+          seatEl.title = '더블클릭하면 다른 자리와 바꿀 수 있어요';
+
+          var cls = num == null ? 'seat empty' : 'seat';
+          if(justShuffled && num != null && !doFlicker) cls += ' pop';
+          if(idx === selectedSwapIdx) cls += ' selected';
+          seatEl.className = cls;
+
+          if(num == null){
+            seatEl.textContent = '빈자리';
+          } else if(doFlicker){
+            seatEl.textContent = num;
+            flickerQueue.push({ el: seatEl, num: num, delay: Math.min(animIndex * 45, 900) });
+            animIndex++;
+          } else {
+            if(justShuffled){
+              seatEl.style.setProperty('--pop-delay', Math.min(animIndex * 18, 320) + 'ms');
+              animIndex++;
+            }
+            seatEl.textContent = num;
+          }
+          groupEl.appendChild(seatEl);
+        }
+
+        var label = document.createElement('div');
+        label.className = 'group-label';
+        label.textContent = '모둠 ' + (groupIndex + 1);
+
+        wrap.appendChild(groupEl);
+        wrap.appendChild(label);
+        rowEl.appendChild(wrap);
+        groupIndex++;
+      }
+
+      rowsContainer.appendChild(rowEl);
+    });
+
+    var floorScroll = rowsContainer.parentElement;
+    rowsContainer.style.transform = '';
+    rowsContainer.style.transformOrigin = 'top center';
+    floorScroll.style.height = '';
+    var naturalWidth = rowsContainer.scrollWidth;
+    var naturalHeight = rowsContainer.scrollHeight;
+    var available = floorScroll.clientWidth;
+    if(available > 0 && naturalWidth > available){
+      var fitScale = Math.max(0.4, (available / naturalWidth) * 0.98);
+      rowsContainer.style.transform = 'scale(' + fitScale + ')';
+      floorScroll.style.height = (naturalHeight * fitScale + 16) + 'px';
+    }
+
+    statsText.innerHTML = '총 <strong>' + state.total + '명</strong> · <strong>' + numGroups + '모둠</strong> · <strong>' + rows.length + '줄</strong>';
+
+    if(doFlicker){
+      flickerQueue.forEach(function(item){
+        animateSlot(item.el, item.num, item.delay);
+      });
+    }
+  }
+
+  function statusForPosition(s){
+    if(timerFinished) return 'done';
+    if(!steps.length) return '';
+    var cur = steps[currentStepIndex];
+    if(cur && cur.position === s) return 'current';
+    var hasStepsForPos = false;
+    var allBefore = true;
+    for(var i = 0; i < steps.length; i++){
+      if(steps[i].position === s){
+        hasStepsForPos = true;
+        if(i >= currentStepIndex) allBefore = false;
+      }
+    }
+    return (hasStepsForPos && allBefore) ? 'done' : '';
+  }
+
+  function renderOrderView(justShuffled){
+    var dims = gridDims(state.groupSize);
+    soloGroup.style.gridTemplateColumns = 'repeat(' + dims.cols + ', ' + SOLO_SEAT + 'px)';
+    soloGroup.style.gridTemplateRows = 'repeat(' + dims.rows + ', ' + SOLO_SEAT + 'px)';
+    soloGroup.innerHTML = '';
+    for(var s = 0; s < state.groupSize; s++){
+      var rank = state.commonOrder[s];
+      var seatEl = document.createElement('div');
+      var statusClass = statusForPosition(s);
+      seatEl.className = 'solo-seat' + (statusClass ? ' ' + statusClass : '') + (justShuffled ? ' pop' : '');
+      if(justShuffled) seatEl.style.setProperty('--pop-delay', (s * 60) + 'ms');
+
+      var numEl = document.createElement('div');
+      numEl.className = 'num';
+      numEl.textContent = rank;
+
+      seatEl.appendChild(numEl);
+      soloGroup.appendChild(seatEl);
+    }
+  }
+
+  function applyTotal(newTotal){
+    newTotal = clampTotal(newTotal);
+    totalInput.value = newTotal;
+    var numGroups = numGroupsFor(newTotal, state.groupSize);
+    state.total = newTotal;
+    state.seatNums = randomizeNumbers(newTotal, numGroups, state.groupSize);
+    selectedSwapIdx = null;
+    saveState();
+    renderBoard(true);
+    liveMsg.textContent = '인원수를 ' + newTotal + '명으로 바꾸고 자리를 새로 배치했습니다.';
+  }
+
+  totalInput.addEventListener('change', function(){
+    applyTotal(parseInt(totalInput.value, 10));
+  });
+  decBtn.addEventListener('click', function(){
+    applyTotal(clampTotal(state.total - 1));
+  });
+  incBtn.addEventListener('click', function(){
+    applyTotal(clampTotal(state.total + 1));
+  });
+
+  function applyCols(newCols){
+    newCols = clampCols(newCols);
+    colsInput.value = newCols;
+    state.cols = newCols;
+    selectedSwapIdx = null;
+    saveState();
+    renderBoard(true);
+    liveMsg.textContent = '한 줄당 모둠 수를 ' + newCols + '개로 바꿨습니다.';
+  }
+
+  colsInput.addEventListener('change', function(){
+    applyCols(parseInt(colsInput.value, 10));
+  });
+  colsDecBtn.addEventListener('click', function(){
+    applyCols(state.cols - 1);
+  });
+  colsIncBtn.addEventListener('click', function(){
+    applyCols(state.cols + 1);
+  });
+
+  function updateGroupSizeCopy(){
+    howtoStep1.textContent = '책상을 ' + state.groupSize + '인 모둠 대형으로 붙여주세요 🪑💨';
+  }
+
+  function applyGroupSize(newSize){
+    newSize = clampGroupSize(newSize);
+    groupSizeInput.value = newSize;
+    state.groupSize = newSize;
+    var numGroups = numGroupsFor(state.total, newSize);
+    state.seatNums = randomizeNumbers(state.total, numGroups, newSize);
+    state.commonOrder = randomizeCommonOrder(newSize);
+    selectedSwapIdx = null;
+    saveState();
+    updateGroupSizeCopy();
+    rebuildSequence();
+    goToStep(0);
+    renderBoard(true);
+    liveMsg.textContent = '한 모둠당 인원을 ' + newSize + '명으로 바꾸고 자리를 새로 배치했습니다.';
+  }
+
+  groupSizeInput.addEventListener('change', function(){
+    applyGroupSize(parseInt(groupSizeInput.value, 10));
+  });
+  groupSizeDecBtn.addEventListener('click', function(){
+    applyGroupSize(state.groupSize - 1);
+  });
+  groupSizeIncBtn.addEventListener('click', function(){
+    applyGroupSize(state.groupSize + 1);
+  });
+
+  shuffleNumbersBtn.addEventListener('click', function(){
+    var numGroups = numGroupsFor(state.total, state.groupSize);
+    state.seatNums = randomizeNumbers(state.total, numGroups, state.groupSize);
+    selectedSwapIdx = null;
+    saveState();
+    renderBoard(true, true);
+    liveMsg.textContent = '학생 번호를 새로 랜덤 배치했습니다.';
+    if(mainBoard) mainBoard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  resetNumbersBtn.addEventListener('click', function(){
+    var numGroups = numGroupsFor(state.total, state.groupSize);
+    state.seatNums = sequentialNumbers(state.total, numGroups, state.groupSize);
+    selectedSwapIdx = null;
+    saveState();
+    renderBoard(true);
+    liveMsg.textContent = '번호를 1번부터 순서대로 초기화했습니다.';
+  });
+
+  shuffleOrderBtn.addEventListener('click', function(){
+    state.commonOrder = randomizeCommonOrder(state.groupSize);
+    saveState();
+    rebuildSequence();
+    goToStep(0, true);
+    liveMsg.textContent = '발표 순서를 새로 랜덤 배치했습니다. 모든 모둠에 동일하게 적용됩니다.';
+  });
+
+  // --- 발표 타이머 -----------------------------------------------------
+  var steps = [];
+  var currentStepIndex = 0;
+  var remainingSeconds = 0;
+  var timerRunning = false;
+  var timerFinished = false;
+  var timerIntervalId = null;
+
+  function rebuildSequence(){
+    var speakerPositions = Array.from({length: state.groupSize}, function(_, i){ return i; }).sort(function(a, b){
+      return state.commonOrder[a] - state.commonOrder[b];
+    });
+    steps = [];
+    for(var i = 0; i < state.groupSize; i++){
+      if(state.explainEnabled) steps.push({ speakerRank: i + 1, position: speakerPositions[i], phase: 'explain' });
+      if(state.feedbackEnabled) steps.push({ speakerRank: i + 1, position: speakerPositions[i], phase: 'feedback' });
+    }
+  }
+
+  function durationFor(phase){
+    return phase === 'explain' ? state.explainSeconds : state.feedbackSeconds;
+  }
+
+  function formatTime(sec){
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function stopInterval(){
+    if(timerIntervalId){ clearInterval(timerIntervalId); timerIntervalId = null; }
+    timerRunning = false;
+  }
+
+  function buildMetaText(){
+    if(!state.explainEnabled && !state.feedbackEnabled){
+      return '설명·피드백 시간이 모두 꺼져 있어요. 하나 이상 켜주세요.';
+    }
+    var parts = [];
+    if(state.explainEnabled) parts.push(formatMinSec(state.explainSeconds) + ' 설명');
+    if(state.feedbackEnabled) parts.push(formatMinSec(state.feedbackSeconds) + ' 피드백');
+    var perSpeakerSec = (state.explainEnabled ? state.explainSeconds : 0) + (state.feedbackEnabled ? state.feedbackSeconds : 0);
+    return '전체 예상 시간 약 ' + formatMinSec(perSpeakerSec * state.groupSize) + ' (' + parts.join(' + ') + ') × ' + state.groupSize + '명';
+  }
+
+  function renderTimer(justShuffled){
+    if(!steps.length){
+      turnWho.textContent = '설명 또는 피드백 시간을 켜주세요';
+      phasePill.textContent = '꺼짐';
+      phasePill.className = 'phase-pill done';
+      timerDisplay.textContent = '--:--';
+      timerDisplay.classList.remove('done', 'urgent');
+      timerFill.className = 'timer-progress-fill';
+      timerFill.style.width = '0%';
+      startPauseBtn.disabled = true;
+      prevPhaseBtn.disabled = true;
+      nextPhaseBtn.disabled = true;
+    } else if(timerFinished){
+      turnWho.textContent = '모든 모둠원 발표가 끝났습니다';
+      phasePill.textContent = '완료';
+      phasePill.className = 'phase-pill done';
+      timerDisplay.textContent = '0:00';
+      timerDisplay.classList.remove('done', 'urgent');
+      timerFill.className = 'timer-progress-fill';
+      timerFill.style.width = '100%';
+      startPauseBtn.disabled = true;
+      prevPhaseBtn.disabled = false;
+      nextPhaseBtn.disabled = true;
+    } else {
+      var step = steps[currentStepIndex];
+      turnWho.innerHTML = '<span>현재 발표자</span><span class="who-badge">' + step.speakerRank + '</span>';
+      phasePill.textContent = step.phase === 'explain' ? '설명' : '피드백';
+      phasePill.className = 'phase-pill ' + step.phase;
+      var urgent = remainingSeconds > 0 && remainingSeconds <= 10;
+      timerDisplay.textContent = formatTime(remainingSeconds);
+      timerDisplay.classList.toggle('done', remainingSeconds <= 0);
+      timerDisplay.classList.toggle('urgent', urgent);
+      var total = durationFor(step.phase);
+      var pct = total > 0 ? Math.max(0, Math.min(100, (remainingSeconds / total) * 100)) : 0;
+      var fillClass = 'timer-progress-fill';
+      if(step.phase === 'feedback') fillClass += ' feedback';
+      if(urgent) fillClass += ' urgent';
+      timerFill.className = fillClass;
+      timerFill.style.width = pct + '%';
+      startPauseBtn.disabled = false;
+      prevPhaseBtn.disabled = currentStepIndex <= 0;
+      nextPhaseBtn.disabled = false;
+      startPauseBtn.textContent = timerRunning ? '일시정지' : '시작';
+    }
+    timerMeta.textContent = buildMetaText();
+    renderOrderView(justShuffled);
+  }
+
+  function goToStep(idx, justShuffled){
+    stopInterval();
+    if(idx >= steps.length){
+      timerFinished = true;
+      currentStepIndex = steps.length;
+      renderTimer(justShuffled);
+      return;
+    }
+    timerFinished = false;
+    currentStepIndex = idx;
+    remainingSeconds = durationFor(steps[idx].phase);
+    renderTimer(justShuffled);
+  }
+
+  function tick(){
+    remainingSeconds--;
+    if(remainingSeconds <= 0){
+      var finishedPhase = steps[currentStepIndex].phase;
+      stopInterval();
+      liveMsg.textContent = (finishedPhase === 'explain' ? '설명' : '피드백') + ' 시간이 끝나 다음 단계로 넘어갑니다.';
+      goToStep(currentStepIndex + 1);
+      return;
+    }
+    renderTimer();
+  }
+
+  startPauseBtn.addEventListener('click', function(){
+    if(timerFinished) return;
+    if(timerRunning){
+      stopInterval();
+    } else {
+      timerRunning = true;
+      timerIntervalId = setInterval(tick, 1000);
+    }
+    renderTimer();
+  });
+
+  prevPhaseBtn.addEventListener('click', function(){
+    goToStep(Math.max(0, currentStepIndex - 1));
+    liveMsg.textContent = '이전 단계로 돌아갔습니다.';
+  });
+
+  nextPhaseBtn.addEventListener('click', function(){
+    goToStep(currentStepIndex + 1);
+    liveMsg.textContent = timerFinished ? '모든 발표가 끝났습니다.' : '다음 단계로 넘어갔습니다.';
+  });
+
+  resetTimerBtn.addEventListener('click', function(){
+    goToStep(0);
+    liveMsg.textContent = '타이머를 처음부터 다시 시작합니다.';
+  });
+
+  function applyExplainDuration(totalSec){
+    state.explainSeconds = clampDurationSeconds(totalSec);
+    var p = secondsToParts(state.explainSeconds);
+    explainMinInput.value = p.m;
+    explainSecInput.value = pad2(p.s);
+    saveState();
+    goToStep(0);
+    liveMsg.textContent = '설명 시간을 ' + formatMinSec(state.explainSeconds) + '로 바꿨습니다.';
+  }
+  function applyFeedbackDuration(totalSec){
+    state.feedbackSeconds = clampDurationSeconds(totalSec);
+    var p = secondsToParts(state.feedbackSeconds);
+    feedbackMinInput.value = p.m;
+    feedbackSecInput.value = pad2(p.s);
+    saveState();
+    goToStep(0);
+    liveMsg.textContent = '피드백 시간을 ' + formatMinSec(state.feedbackSeconds) + '로 바꿨습니다.';
+  }
+
+  function readExplainInputs(){
+    return (parseInt(explainMinInput.value, 10) || 0) * 60 + (parseInt(explainSecInput.value, 10) || 0);
+  }
+  function readFeedbackInputs(){
+    return (parseInt(feedbackMinInput.value, 10) || 0) * 60 + (parseInt(feedbackSecInput.value, 10) || 0);
+  }
+
+  explainMinInput.addEventListener('change', function(){ applyExplainDuration(readExplainInputs()); });
+  explainSecInput.addEventListener('change', function(){ applyExplainDuration(readExplainInputs()); });
+  explainDecBtn.addEventListener('click', function(){ applyExplainDuration(state.explainSeconds - 30); });
+  explainIncBtn.addEventListener('click', function(){ applyExplainDuration(state.explainSeconds + 30); });
+  feedbackMinInput.addEventListener('change', function(){ applyFeedbackDuration(readFeedbackInputs()); });
+  feedbackSecInput.addEventListener('change', function(){ applyFeedbackDuration(readFeedbackInputs()); });
+  feedbackDecBtn.addEventListener('click', function(){ applyFeedbackDuration(state.feedbackSeconds - 30); });
+  feedbackIncBtn.addEventListener('click', function(){ applyFeedbackDuration(state.feedbackSeconds + 30); });
+
+  explainEnabledBox.addEventListener('change', function(){
+    state.explainEnabled = explainEnabledBox.checked;
+    explainStepper.classList.toggle('disabled', !state.explainEnabled);
+    explainMinInput.disabled = explainSecInput.disabled = explainDecBtn.disabled = explainIncBtn.disabled = !state.explainEnabled;
+    saveState();
+    rebuildSequence();
+    goToStep(0);
+    liveMsg.textContent = state.explainEnabled ? '설명 시간을 켰습니다.' : '설명 시간을 껐습니다.';
+  });
+  feedbackEnabledBox.addEventListener('change', function(){
+    state.feedbackEnabled = feedbackEnabledBox.checked;
+    feedbackStepper.classList.toggle('disabled', !state.feedbackEnabled);
+    feedbackMinInput.disabled = feedbackSecInput.disabled = feedbackDecBtn.disabled = feedbackIncBtn.disabled = !state.feedbackEnabled;
+    saveState();
+    rebuildSequence();
+    goToStep(0);
+    liveMsg.textContent = state.feedbackEnabled ? '피드백 시간을 켰습니다.' : '피드백 시간을 껐습니다.';
+  });
+
+  function activateTab(which){
+    var isBoard = which === 'board';
+    boardTab.classList.toggle('active', isBoard);
+    orderTab.classList.toggle('active', !isBoard);
+    boardTab.setAttribute('aria-selected', isBoard ? 'true' : 'false');
+    orderTab.setAttribute('aria-selected', !isBoard ? 'true' : 'false');
+    boardSection.hidden = !isBoard;
+    orderSection.hidden = isBoard;
+  }
+  boardTab.addEventListener('click', function(){ activateTab('board'); });
+  orderTab.addEventListener('click', function(){ activateTab('order'); });
+
+  renderBoard(false);
+  rebuildSequence();
+  goToStep(0);
+})();
+</script>
