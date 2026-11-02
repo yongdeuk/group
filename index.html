@@ -636,6 +636,15 @@
 
   /* ===== 진로 모둠 탭 ===== */
   .howto[hidden]{ display:none !important; }
+  .cg-map{ margin-top:12px; border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--bg); }
+  .cg-map[hidden]{ display:none; }
+  .cg-map h3{ margin:0 0 6px; font-size:.95rem; }
+  .cg-map .cg-maprow{ display:grid; grid-template-columns: 120px 1fr; gap:6px 10px; align-items:center; margin-bottom:6px; font-size:.86rem; }
+  .cg-map select{ width:100%; }
+  .cg-preview{ overflow-x:auto; margin:8px 0; }
+  .cg-preview table{ font-size:.76rem; }
+  .cg-preview th.on{ color:var(--accent); }
+  .cg-major{ font-size:.72rem; color:var(--ink-muted); }
   .cg-card{
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
     box-shadow: var(--shadow); padding: 16px 18px;
@@ -828,18 +837,21 @@
     <div class="cg-grid cg-noprint">
       <div class="cg-card">
         <h2><span class="cg-step">1</span>학생 명단 붙여넣기</h2>
-        <p class="cg-hint">엑셀·구글 시트에서 <b>번호 / 이름 / 희망 계열 / 관심 계열(선택)</b>을 복사해 붙여넣으세요.<br>
+        <p class="cg-hint"><b>리로스쿨</b>에서 학생 명단(희망 전공·진로 포함)을 엑셀로 내려받아 <b>📂 리로스쿨 엑셀 올리기</b>를 누르면 열을 자동으로 찾아 연결해요. (.xlsx / .xls / .csv)<br>
+        또는 엑셀·구글 시트에서 <b>번호 / 이름 / 희망 계열 / 관심 계열(선택)</b>을 복사해 붙여넣으세요.<br>
         "공대", "간호", "교대"처럼 써도 가까운 계열로 인식해요. 진로가 정해지지 않았다면 <b>미정</b>이라고 쓰거나 비워두세요. 미정이어도 관심 계열이 있으면 적어주면 좋아요.</p>
         <textarea id="cgRaw" placeholder="번호	이름	희망 계열	관심 계열
 1	김민준	공학	자연
 2	이서연	미정	의약
 3	박지호	미정"></textarea>
         <div class="cg-row" style="margin-top:10px">
-          <button type="button" class="action primary" id="cgParse">명단 불러오기</button>
+          <button type="button" class="action primary" id="cgFileBtn">📂 리로스쿨 엑셀 올리기</button>
+          <input type="file" id="cgFile" accept=".xlsx,.xls,.csv,.txt,.tsv" hidden>
+          <button type="button" class="action primary" id="cgParse">붙여넣은 명단 불러오기</button>
           <button type="button" class="action secondary" id="cgSample">예시 데이터</button>
-          <label class="action secondary" style="cursor:pointer">CSV 파일<input type="file" id="cgFile" accept=".csv,.txt,.tsv" hidden></label>
           <button type="button" class="action secondary" id="cgClear">모두 지우기</button>
         </div>
+        <div id="cgMap" class="cg-map" hidden></div>
       </div>
       <div class="cg-card">
         <h2>불러온 학생 <span class="cg-count" id="cgStuCount"></span></h2>
@@ -1646,13 +1658,13 @@
   var STORE_KEY = 'career-groups-v1';
   var UNDECIDED_WORDS = /^(미정|미결정|모름|모르겠음|없음|고민중?|탐색중?|아직|\?+|-|x|X)$/;
   var DEFAULT_FIELDS = [
-    {name:"인문", color:"#D9480F", family:1, keys:"인문,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역"},
-    {name:"사회", color:"#C08A2C", family:1, keys:"사회,경영,경제,법,행정,정치,외교,심리,미디어,신문방송,언론,회계,무역,광고,경찰,사회복지"},
-    {name:"교육", color:"#C2255C", family:1, keys:"교육,교대,사범,교사,유아교육,초등,특수교육,상담"},
-    {name:"자연", color:"#2F9E44", family:2, keys:"자연,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학"},
-    {name:"공학", color:"#1C7ED6", family:2, keys:"공학,공대,컴퓨터,소프트웨어,SW,AI,인공지능,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,정보,데이터,IT,개발,게임"},
-    {name:"의약", color:"#0C8599", family:2, keys:"의약,의학,의대,의사,치의,한의,약학,약대,간호,보건,물리치료,임상,수의,방사선,응급구조,치위생"},
-    {name:"예체능", color:"#7048E8", family:3, keys:"예체능,예술,미술,음악,체육,디자인,연극,영화,무용,실용음악,스포츠,웹툰,애니,패션,사진,작곡,뷰티,요리,조리"}
+    {name:"인문", color:"#D9480F", family:1, keys:"인문,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역,문헌정보,고고,종교,신학,중문,중어,일문,일어,독문,독어,불문,불어,노어,서어,한문,문화인류,미학,인문학,문예,번역"},
+    {name:"사회", color:"#C08A2C", family:1, keys:"사회,경영,경제,법,행정,정치,외교,심리,미디어,신문방송,언론,회계,무역,광고,경찰,사회복지,정치외교,사회학,지리,국제,부동산,관광,호텔,항공서비스,비서,세무,금융,경찰행정,소방행정,행정학,도시,커뮤니케이션,아동가족,소비자,유통,물류,마케팅,창업,군사,국방,공무원,변호사,기자,PD"},
+    {name:"교육", color:"#C2255C", family:1, keys:"교육,교대,사범,교사,유아교육,초등,특수교육,상담,교육과,교육학,교직,보육,사서교사,선생님"},
+    {name:"자연", color:"#2F9E44", family:2, keys:"자연,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학,화학과,생명과학,생활과학,식품영양,영양,의류,동물,산림,원예,조경,지질,대기,천문우주,통계학,수리,물리학,연구원"},
+    {name:"공학", color:"#1C7ED6", family:2, keys:"공학,공대,컴퓨터,소프트웨어,SW,AI,인공지능,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,정보,데이터,IT,개발,게임,전산,자동차,건설,산업공학,에너지,원자력,조선,해양공학,화학공학,생명공학,환경공학,식품공학,재료,시스템,통신,모바일,보안,융합공학,드론,미래자동차,메카트로닉스,엔지니어,프로그래머,설계"},
+    {name:"의약", color:"#0C8599", family:2, keys:"의약,의학,의대,의사,치의,한의,약학,약대,간호,보건,물리치료,임상,수의,방사선,응급구조,치위생,의예,치의예,한의예,재활,작업치료,언어치료,안경광학,의료,병원,제약,바이오의약,간호사,약사,수의사,치과"},
+    {name:"예체능", color:"#7048E8", family:3, keys:"예체능,예술,미술,음악,체육,디자인,연극,영화,무용,실용음악,스포츠,웹툰,애니,패션,사진,작곡,뷰티,요리,조리,연기,실용,성악,피아노,국악,회화,조소,산업디자인,시각디자인,실내디자인,영상,방송연예,모델,경호,태권도,운동,체육교육,만화,일러스트,메이크업,제과,바리스타,작가,배우,가수,운동선수"}
   ];
   var EXPLORE = "진로 탐색";
   var TOPICS = {
@@ -1668,7 +1680,7 @@
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
   var state = {
-    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS),
+    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS), keysVersion:2,
     settings:{min:2, max:5, target:4, undecided:"interest", use2nd:true, roles:true, roleList:"모둠장, 자료조사, 보고서 작성, 발표, 시각자료(PPT)"}
   };
   function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -1677,7 +1689,16 @@
     if(saved && saved.students){
       var st = Object.assign({}, state.settings, saved.settings);
       state = Object.assign(state, saved); state.settings = st;
+      if((saved.keysVersion||1) < 2){
+        state.fields.forEach(function(f){
+          var d = DEFAULT_FIELDS.filter(function(x){ return x.name===f.name; })[0]; if(!d) return;
+          var have = f.keys.split(",").map(function(k){ return k.trim(); });
+          d.keys.split(",").forEach(function(k){ if(have.indexOf(k)<0) have.push(k); });
+          f.keys = have.filter(Boolean).join(",");
+        });
+      }
     }
+    state.keysVersion = 2;
   }catch(e){}
 
   function $(id){ return document.getElementById(id); }
@@ -1714,6 +1735,12 @@
   }
 
   /* ---------- 학생 입력 ---------- */
+  /* 원문이 계열 이름과 다를 때만(예: "컴퓨터공학과") 보관해서 보여줌 */
+  function majorText(raw, field){
+    raw = String(raw||"").trim();
+    if(!raw || raw===field || raw.replace(/\s|계열/g,"")===field || UNDECIDED_WORDS.test(raw.replace(/\s/g,""))) return "";
+    return raw.length > 40 ? raw.slice(0,40)+"…" : raw;
+  }
   function parseRaw(text){
     var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
     var out = [];
@@ -1726,7 +1753,8 @@
       if(!name) return;
       var n1 = normalizeField(f1), n2 = normalizeField(f2);
       var unknown = !!(f1 && !n1 && !UNDECIDED_WORDS.test(String(f1).replace(/\s|계열/g,"")));
-      out.push({id:newId(), num:num, name:name, field:n1, field2:(n2 && n2!==n1)?n2:"", rawField: unknown ? f1 : ""});
+      out.push({id:newId(), num:num, name:name, field:n1, field2:(n2 && n2!==n1)?n2:"", rawField: unknown ? f1 : "",
+                major: majorText(f1, n1), major2: majorText(f2, n2)});
     });
     return out;
   }
@@ -1735,7 +1763,8 @@
   }
   function renderStudents(){
     $('cgStuTable').tBodies[0].innerHTML = state.students.map(function(s){
-      return '<tr data-id="'+s.id+'"><td>'+esc(s.num)+'</td><td>'+esc(s.name)+'</td>'+
+      var mj = [s.major, s.major2].filter(Boolean).join(" / ");
+      return '<tr data-id="'+s.id+'"><td>'+esc(s.num)+'</td><td>'+esc(s.name)+(mj?'<br><span class="cg-major">'+esc(mj)+'</span>':'')+'</td>'+
         '<td><select data-k="field">'+fieldOptions(s.field,"미정")+'</select></td>'+
         '<td><select data-k="field2">'+fieldOptions(s.field2,"-")+'</select></td>'+
         '<td><button type="button" class="cg-x" data-del title="삭제">✕</button></td></tr>';
@@ -1774,13 +1803,161 @@
     state.raw = text; state.students = list; state.groups = [];
     save(); renderStudents(); renderGroups(); say(list.length+"명을 불러왔습니다.");
   });
+  /* ---------- 리로스쿨 엑셀 / CSV 불러오기 ---------- */
+  var XLSX_SRC = ["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+                  "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"];
+  function loadXLSX(){
+    if(window.XLSX) return Promise.resolve(window.XLSX);
+    return XLSX_SRC.reduce(function(p, src){
+      return p.catch(function(){ return new Promise(function(ok, fail){
+        var sc = document.createElement('script'); sc.src = src;
+        sc.onload = function(){ window.XLSX ? ok(window.XLSX) : fail(); };
+        sc.onerror = function(){ sc.remove(); fail(); };
+        document.head.appendChild(sc);
+      }); });
+    }, Promise.reject());
+  }
+  function textToRows(text){
+    return text.split(/\r?\n/).filter(function(l){ return l.trim(); }).map(function(l){
+      var sep = l.indexOf("\t")>=0 ? "\t" : ",";
+      var out = [], cur = "", q = false;
+      for(var i=0;i<l.length;i++){
+        var c = l[i];
+        if(c === '"'){ if(q && l[i+1]==='"'){ cur+='"'; i++; } else q = !q; }
+        else if(c === sep && !q){ out.push(cur); cur = ""; }
+        else cur += c;
+      }
+      out.push(cur); return out.map(function(x){ return x.trim(); });
+    });
+  }
+  var COLS = [
+    {k:"grade", label:"학년", re:/^학년$/},
+    {k:"cls",   label:"반",   re:/^반$|^학급$/},
+    {k:"num",   label:"번호", re:/^번호$|^번$|출석번호|^학번$/},
+    {k:"name",  label:"이름", re:/이름|성명|학생명/, need:true},
+    {k:"f1",    label:"희망 전공·계열", re:/희망.*(전공|학과|계열|진로|분야|직업)|진로.*희망|^전공|^학과|^계열|1지망|1순위|희망진로|진로희망|전공희망/, need:true},
+    {k:"f2",    label:"관심·보조 열(선택)", re:/2지망|2순위|관심|희망.*2|전공2|학과2/}
+  ];
+  var mapState = null;
+  function guessHeader(rows){
+    var best = 0, bestScore = -1;
+    for(var i=0;i<Math.min(rows.length, 15);i++){
+      var r = rows[i].map(function(c){ return String(c==null?"":c).replace(/\s/g,""); });
+      var sc = COLS.reduce(function(a,c){ return a + (r.some(function(x){ return c.re.test(x); }) ? 1 : 0); }, 0);
+      if(sc > bestScore){ bestScore = sc; best = i; }
+    }
+    return best;
+  }
+  function guessCols(head, body){
+    var used = {}, map = {};
+    var h = head.map(function(c){ return String(c==null?"":c).replace(/\s/g,""); });
+    var hits = function(i){ return body.reduce(function(a,r){ return a + (normalizeField(cell(r,i)) ? 1 : 0); }, 0); };
+    ["grade","cls","num","name"].forEach(function(k){
+      var col = COLS.filter(function(c){ return c.k===k; })[0];
+      var cands = h.map(function(x,i){ return i; }).filter(function(i){ return !used[i] && col.re.test(h[i]); });
+      if(k==="num"){ var exact = cands.filter(function(i){ return /^번호$|^번$|출석/.test(h[i]); }); if(exact.length) cands = exact; }
+      if(cands.length){ map[k] = cands[0]; used[cands[0]] = 1; } else map[k] = -1;
+    });
+    // 희망 전공·계열: 이름이 맞는 열 중 실제로 계열을 많이 알아본 열 (전공·학과 열 우선)
+    var reF1 = COLS.filter(function(c){ return c.k==="f1"; })[0].re, reF2 = COLS.filter(function(c){ return c.k==="f2"; })[0].re;
+    var f2c = h.map(function(x,i){ return i; }).filter(function(i){ return !used[i] && reF2.test(h[i]); });
+    var f1c = h.map(function(x,i){ return i; }).filter(function(i){ return !used[i] && f2c.indexOf(i)<0 && reF1.test(h[i]); })
+      .map(function(i){ return {i:i, n:hits(i) + (/전공|학과|계열/.test(h[i]) ? 0.5 : 0)}; })
+      .sort(function(a,b){ return b.n-a.n; });
+    map.f1 = f1c.length ? f1c[0].i : -1;
+    // 관심 열: 2지망·관심 열이 없으면 두 번째 진로 열(예: 희망 직업)을 보조로
+    if(f2c.length) map.f2 = f2c[0];
+    else map.f2 = (f1c.length > 1 && f1c[1].n >= 1) ? f1c[1].i : -1;
+    return map;
+  }
+  function cell(r, i){ return i>=0 && r[i]!=null ? String(r[i]).trim() : ""; }
+  function showMapper(rows, fileName){
+    rows = rows.filter(function(r){ return r && r.some(function(c){ return String(c==null?"":c).trim(); }); });
+    if(!rows.length){ alert("파일에서 내용을 찾지 못했어요."); return; }
+    var hi = guessHeader(rows);
+    mapState = {rows:rows, hi:hi, map:guessCols(rows[hi], rows.slice(hi+1)), fileName:fileName};
+    renderMapper();
+  }
+  function renderMapper(){
+    var m = mapState, head = m.rows[m.hi], body = m.rows.slice(m.hi+1);
+    var opt = function(sel){ return '<option value="-1">(없음)</option>' + head.map(function(h,i){
+      return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(String(h||"").trim() || ("열 "+(i+1)))+'</option>'; }).join(""); };
+    var html = '<h3>📄 '+esc(m.fileName)+' — 열 연결</h3>'+
+      '<p class="cg-hint" style="margin-top:0">자동으로 찾은 열이 맞는지 확인하세요. 틀리면 직접 고르면 돼요.</p>'+
+      '<div class="cg-maprow"><span>제목 줄</span><select data-hi>'+m.rows.slice(0,15).map(function(r,i){
+        return '<option value="'+i+'"'+(i===m.hi?' selected':'')+'>'+(i+1)+'번째 줄: '+esc(r.filter(Boolean).slice(0,4).join(" | "))+'</option>'; }).join("")+'</select></div>'+
+      COLS.map(function(c){ return '<div class="cg-maprow"><span>'+c.label+(c.need?' *':'')+'</span><select data-col="'+c.k+'">'+opt(m.map[c.k])+'</select></div>'; }).join("");
+    // 반 고르기 (학년 전체 파일일 때)
+    var classes = [];
+    if(m.map.cls >= 0){
+      body.forEach(function(r){ var v = (m.map.grade>=0 ? cell(r,m.map.grade)+"학년 " : "") + cell(r,m.map.cls)+"반"; if(cell(r,m.map.cls) && classes.indexOf(v)<0) classes.push(v); });
+      if(classes.length > 1){
+        if(!m.cls || classes.indexOf(m.cls)<0) m.cls = "";
+        html += '<div class="cg-maprow"><span>불러올 반</span><select data-cls><option value="">전체 ('+body.length+'명)</option>'+
+          classes.map(function(c){ return '<option'+(c===m.cls?' selected':'')+'>'+esc(c)+'</option>'; }).join("")+'</select></div>';
+      }
+    }
+    var sel = selectedRows();
+    var shown = COLS.filter(function(c){ return m.map[c.k] >= 0; });
+    html += '<div class="cg-preview"><table class="cg-table"><thead><tr>'+shown.map(function(c){ return '<th class="on">'+c.label+'</th>'; }).join("")+'<th>→ 인식된 계열</th></tr></thead><tbody>'+
+      sel.slice(0,5).map(function(r){ return '<tr>'+shown.map(function(c){ return '<td>'+esc(cell(r,m.map[c.k]))+'</td>'; }).join("")+'<td>'+chip(normalizeField(cell(r,m.map.f1)))+'</td></tr>'; }).join("")+
+      '</tbody></table></div>'+
+      '<div class="cg-row"><button type="button" class="action primary" data-apply>이대로 '+sel.length+'명 불러오기</button>'+
+      '<button type="button" class="action secondary" data-cancel>취소</button></div>';
+    $('cgMap').innerHTML = html; $('cgMap').hidden = false;
+  }
+  function selectedRows(){
+    var m = mapState;
+    return m.rows.slice(m.hi+1).filter(function(r){
+      if(!cell(r, m.map.name)) return false;
+      if(m.cls){ var v = (m.map.grade>=0 ? cell(r,m.map.grade)+"학년 " : "") + cell(r,m.map.cls)+"반"; if(v!==m.cls) return false; }
+      return true;
+    });
+  }
+  $('cgMap').addEventListener('change', function(e){
+    var m = mapState; if(!m) return;
+    if(e.target.matches('[data-hi]')){ m.hi = +e.target.value; m.map = guessCols(m.rows[m.hi], m.rows.slice(m.hi+1)); m.cls = ""; }
+    if(e.target.dataset.col){ m.map[e.target.dataset.col] = +e.target.value; }
+    if(e.target.matches('[data-cls]')) m.cls = e.target.value;
+    renderMapper();
+  });
+  $('cgMap').addEventListener('click', function(e){
+    if(e.target.matches('[data-cancel]')){ $('cgMap').hidden = true; mapState = null; return; }
+    if(!e.target.matches('[data-apply]')) return;
+    var m = mapState;
+    if(m.map.name < 0){ alert("이름 열을 골라 주세요."); return; }
+    var clean = function(v){ return String(v).replace(/[\t\r\n]+/g, " "); };
+    var lines = selectedRows().map(function(r, i){
+      var num = cell(r, m.map.num).replace(/\D/g, "");
+      if(num.length >= 4) num = String(parseInt(num.slice(-2),10));   // 학번(20315) → 번호(15)
+      return [num || String(i+1), cell(r,m.map.name), cell(r,m.map.f1), cell(r,m.map.f2)].map(clean).join("\t");
+    });
+    $('cgRaw').value = "번호\t이름\t희망 계열\t관심 계열\n" + lines.join("\n");
+    $('cgMap').hidden = true; mapState = null;
+    $('cgParse').click();
+  });
+  $('cgFileBtn').addEventListener('click', function(){ $('cgFile').click(); });
   $('cgFile').addEventListener('change', function(e){
-    var f = e.target.files[0]; if(!f) return;
+    var f = e.target.files[0]; if(!f) return; e.target.value = "";
+    var isExcel = /\.(xlsx|xls|xlsm)$/i.test(f.name);
     f.arrayBuffer().then(function(buf){
-      var text = new TextDecoder("utf-8").decode(buf);
-      if(text.indexOf("�")>=0){ try{ text = new TextDecoder("euc-kr").decode(buf); }catch(err){} }
-      $('cgRaw').value = text; e.target.value = "";
-      say("파일 내용을 넣었습니다. 명단 불러오기를 누르세요.");
+      if(!isExcel){
+        var text = new TextDecoder("utf-8").decode(buf);
+        if(text.indexOf("�")>=0){ try{ text = new TextDecoder("euc-kr").decode(buf); }catch(err){} }
+        showMapper(textToRows(text.replace(/^﻿/,"")), f.name); return;
+      }
+      say("엑셀 파일을 읽는 중…");
+      loadXLSX().then(function(X){
+        var wb = X.read(new Uint8Array(buf), {type:"array"});
+        var best = null;
+        wb.SheetNames.forEach(function(n){
+          var rows = X.utils.sheet_to_json(wb.Sheets[n], {header:1, raw:false, defval:""});
+          if(!best || rows.length > best.length) best = rows;
+        });
+        showMapper(best || [], f.name);
+      }).catch(function(){
+        alert("엑셀 파일을 읽는 도구를 불러오지 못했어요 (인터넷 연결 확인).\n엑셀에서 [다른 이름으로 저장 → CSV]로 저장해서 올리면 바로 읽을 수 있어요.");
+      });
     });
   });
   $('cgSample').addEventListener('click', function(){
@@ -1788,7 +1965,7 @@
     var rows = [["공학","자연"],["공학",""],["공대 컴퓨터","자연"],["공학","예체능"],["공학",""],["의약","자연"],["간호","교육"],["의약",""],["의약","자연"],["자연","의약"],["자연","공학"],["사회","인문"],["경영",""],["사회","교육"],["사회",""],["인문","사회"],["교육","인문"],["교대",""],["예체능","공학"],["미정","의약"],["미정","공학"],["미정","사회"],["미정",""],["미정",""],["미정",""],["모름","예체능"],["",""],["미정",""]];
     rows = shuffle(rows);
     $('cgRaw').value = "번호\t이름\t희망 계열\t관심 계열\n" + names.map(function(n,i){ return (i+1)+"\t"+n+"\t"+rows[i][0]+"\t"+rows[i][1]; }).join("\n");
-    say("예시 데이터를 넣었습니다. 명단 불러오기를 누르세요.");
+    say("예시 데이터를 넣었습니다. [붙여넣은 명단 불러오기]를 누르세요.");
   });
   $('cgClear').addEventListener('click', function(){
     if(!confirm("학생 명단과 진로 모둠 결과를 모두 지울까요?")) return;
@@ -1864,7 +2041,7 @@
     readSettings();
     var S = state.settings;
     if(!state.students.length){ alert("먼저 ① 학생 명단을 불러오세요."); return; }
-    var studs = state.students.map(function(s){ return {id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, role:""}; });
+    var studs = state.students.map(function(s){ return {id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, major:s.major||"", major2:s.major2||"", role:""}; });
     var groups = [], leftovers = [], explore = [], spread = [];
 
     // 미정 학생 분류
@@ -2014,7 +2191,8 @@
           var opts = roles.map(function(r){ return '<option'+(r===m.role?' selected':'')+'>'+esc(r)+'</option>'; }).join("");
           if(m.role && roles.indexOf(m.role)<0) opts += '<option selected>'+esc(m.role)+'</option>';
           opts += '<option value=""'+(m.role?'':' selected')+'>-</option>';
-          var sub = m.field2 ? '<span class="cg-f2">'+'관심 '+esc(m.field2)+'</span>' : '';
+          var sub = [m.major, m.field2 ? '관심 '+(m.major2||m.field2) : ''].filter(Boolean).map(esc).join(" · ");
+          if(sub) sub = '<br><span class="cg-f2">'+sub+'</span>';
           return '<div class="cg-member" draggable="true" data-m="'+m.id+'"><span class="cg-num">'+esc(m.num)+'</span>'+
             '<span class="cg-name">'+esc(m.name)+' '+sub+'</span>'+chip(m.field)+
             '<select data-role aria-label="역할">'+opts+'</select></div>';
@@ -2078,7 +2256,7 @@
     var placed = {}; state.groups.forEach(function(g){ g.members.forEach(function(m){ placed[m.id]=1; }); });
     state.students.filter(function(s){ return !placed[s.id]; }).forEach(function(s){
       var g = state.groups.slice().sort(function(a,b){ return a.members.length-b.members.length; })[0];
-      if(g) g.members.push({id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, role:"공동 조사"});
+      if(g) g.members.push({id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, major:s.major||"", major2:s.major2||"", role:"공동 조사"});
     });
     save(); renderGroups();
   });
@@ -2095,8 +2273,8 @@
   window.addEventListener('afterprint', function(){ document.body.classList.remove('cg-printing'); });
   $('cgCSV').addEventListener('click', function(){
     if(!state.groups.length){ alert("먼저 모둠을 만들어 주세요."); return; }
-    var rows = [["모둠","보고서 주제","번호","이름","희망 계열","관심 계열","역할"]];
-    state.groups.forEach(function(g){ g.members.forEach(function(m){ rows.push([g.title, g.topic, m.num, m.name, m.field||"미정", m.field2, m.role]); }); });
+    var rows = [["모둠","보고서 주제","번호","이름","희망 계열","희망 전공(원문)","관심 계열","관심 전공(원문)","역할"]];
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ rows.push([g.title, g.topic, m.num, m.name, m.field||"미정", m.major||"", m.field2, m.major2||"", m.role]); }); });
     var csv = "﻿" + rows.map(function(r){ return r.map(function(c){ return '"' + String(c==null?"":c).replace(/"/g,'""') + '"'; }).join(","); }).join("\r\n");
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
