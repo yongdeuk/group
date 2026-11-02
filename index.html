@@ -645,6 +645,14 @@
   .cg-preview table{ font-size:.76rem; }
   .cg-preview th.on{ color:var(--accent); }
   .cg-major{ font-size:.72rem; color:var(--ink-muted); }
+  .cg-pal{ border:2px solid transparent; border-radius:999px; padding:3px; background:transparent; cursor:pointer; }
+  .cg-pal.on{ border-color:var(--ink); }
+  .cg-pal .cg-chip{ font-size:.82rem; padding:3px 11px; }
+  .cg-numgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(52px,1fr)); gap:6px; }
+  .cg-numcell{ height:52px; border-radius:10px; border:1px dashed var(--ink-muted); background:var(--surface); color:var(--ink);
+    font-family:'Space Mono',monospace; font-weight:700; font-size:1rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; }
+  .cg-numcell small{ font-family:'Work Sans',sans-serif; font-size:.62rem; font-weight:600; }
+  .cg-numcell.set{ border:1px solid transparent; color:#fff; }
   .cg-card{
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
     box-shadow: var(--shadow); padding: 16px 18px;
@@ -846,12 +854,24 @@
 3	박지호	미정"></textarea>
         <div class="cg-row" style="margin-top:10px">
           <button type="button" class="action primary" id="cgFileBtn">📂 리로스쿨 엑셀 올리기</button>
+          <button type="button" class="action primary" id="cgNumBtn">🔢 번호만으로 정하기</button>
           <input type="file" id="cgFile" accept=".xlsx,.xls,.csv,.txt,.tsv" hidden>
           <button type="button" class="action primary" id="cgParse">붙여넣은 명단 불러오기</button>
           <button type="button" class="action secondary" id="cgSample">예시 데이터</button>
           <button type="button" class="action secondary" id="cgClear">모두 지우기</button>
         </div>
         <div id="cgMap" class="cg-map" hidden></div>
+        <div id="cgNum" class="cg-map" hidden>
+          <h3>🔢 번호만으로 정하기</h3>
+          <p class="cg-hint" style="margin-top:0">이름 없이 번호로만 모둠을 만들어요. ① 인원수를 넣고 [번호판 만들기] → ② 아래에서 계열을 고르고 → ③ 그 계열 학생 번호를 눌러 칠하세요. (예: "공학 희망 손 들어보세요" 하고 바로 누르기) 다시 누르면 미정으로 돌아가요.</p>
+          <div class="cg-row" style="margin-bottom:10px">
+            <label>총 인원 <input type="number" id="cgNumTotal" min="2" max="60" value="28"></label>
+            <button type="button" class="action secondary small" id="cgNumMake">번호판 만들기</button>
+            <button type="button" class="action secondary small" id="cgNumClose">닫기</button>
+          </div>
+          <div class="cg-row" id="cgPalette" style="gap:6px;margin-bottom:10px"></div>
+          <div class="cg-numgrid" id="cgNumGrid"></div>
+        </div>
       </div>
       <div class="cg-card">
         <h2>불러온 학생 <span class="cg-count" id="cgStuCount"></span></h2>
@@ -1741,6 +1761,16 @@
     if(!raw || raw===field || raw.replace(/\s|계열/g,"")===field || UNDECIDED_WORDS.test(raw.replace(/\s/g,""))) return "";
     return raw.length > 40 ? raw.slice(0,40)+"…" : raw;
   }
+  function numName(n){ return n + "번"; }
+  function isNumOnly(s){ return s.name === numName(s.num); }
+  /* 계열 이름·인식 단어와 정확히 같거나 "미정"이면 true (학생 이름과 헷갈리지 않게 엄격하게) */
+  function isFieldWord(v){
+    var t = String(v==null?"":v).replace(/\s|계열/g,"");
+    if(!t || UNDECIDED_WORDS.test(t)) return true;
+    return state.fields.some(function(f){
+      return [f.name].concat(f.keys.split(",")).some(function(k){ k = k.trim(); return k && (t===k || t===k+"과" || t===k+"학과" || t===k+"학"); });
+    });
+  }
   function parseRaw(text){
     var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
     var out = [];
@@ -1748,7 +1778,10 @@
       if(idx===0 && /이름|성명|name/i.test(line)) return;
       var cols = line.split(line.indexOf("\t")>=0 ? "\t" : /[,;]/).map(function(c){ return c.trim().replace(/^"|"$/g,""); });
       var num, name, f1, f2;
-      if(/^\d+$/.test(cols[0])){ num=cols[0]; name=cols[1]; f1=cols[2]; f2=cols[3]; }
+      if(/^\d+$/.test(cols[0]) && isFieldWord(cols[1]) && (cols.length < 3 || !cols[2] || isFieldWord(cols[2]))){
+        num=cols[0]; name=numName(num); f1=cols[1]; f2=cols[2];          // 번호만 있는 명단
+      }
+      else if(/^\d+$/.test(cols[0])){ num=cols[0]; name=cols[1] || numName(num); f1=cols[2]; f2=cols[3]; }
       else { num=String(out.length+1); name=cols[0]; f1=cols[1]; f2=cols[2]; }
       if(!name) return;
       var n1 = normalizeField(f1), n2 = normalizeField(f2);
@@ -1780,6 +1813,7 @@
     if(unk.length) html += '<div class="cg-warn">계열을 알아보지 못한 학생: '+unk.map(function(s){ return esc(s.name)+'("'+esc(s.rawField)+'")'; }).join(", ")+' — 표에서 직접 고르거나, 아래 [계열 목록·인식 단어 고치기]에 단어를 추가하세요. 지금은 미정으로 처리돼요.</div>';
     if(und.length) html += '<div class="cg-warn" style="background:var(--bg);border-color:var(--border)">진로 미정 '+und.length+'명 (관심 계열 있음 '+und.filter(function(s){return s.field2;}).length+'명) — 처리 방법은 ② 모둠 규칙에서 고를 수 있어요.</div>';
     $('cgParseWarn').innerHTML = html;
+    if(typeof renderNumPanel === "function") renderNumPanel();
   }
   $('cgStuTable').addEventListener('change', function(e){
     var tr = e.target.closest('tr'); if(!tr) return;
@@ -1937,6 +1971,49 @@
     $('cgParse').click();
   });
   $('cgFileBtn').addEventListener('click', function(){ $('cgFile').click(); });
+
+  /* ---------- 번호만으로 정하기 ---------- */
+  var paint = "";   // 지금 칠할 계열 ("" = 미정)
+  function renderNumPanel(){
+    if($('cgNum').hidden) return;
+    $('cgPalette').innerHTML = state.fields.map(function(f){
+      return '<button type="button" class="cg-pal'+(paint===f.name?' on':'')+'" data-pal="'+esc(f.name)+'">'+chip(f.name)+'</button>';
+    }).join("") + '<button type="button" class="cg-pal'+(paint===""?' on':'')+'" data-pal="">'+chip("")+'</button>';
+    var list = state.students.slice().sort(function(a,b){ return (parseInt(a.num,10)||0)-(parseInt(b.num,10)||0); });
+    $('cgNumGrid').innerHTML = list.length ? list.map(function(s){
+      var bg = s.field ? ' style="background:'+colorOf(s.field)+'"' : '';
+      return '<button type="button" class="cg-numcell'+(s.field?' set':'')+'"'+bg+' data-sid="'+s.id+'" title="'+esc(s.name)+'">'+esc(s.num)+'<small>'+esc(s.field||"미정")+'</small></button>';
+    }).join("") : '<p class="cg-hint">총 인원을 넣고 [번호판 만들기]를 누르세요.</p>';
+  }
+  $('cgNumBtn').addEventListener('click', function(){
+    var seat = document.getElementById('totalInput');
+    if(!state.students.length && seat && +seat.value) $('cgNumTotal').value = seat.value;   // 자리 배치 탭 인원수 그대로
+    $('cgNum').hidden = false; $('cgMap').hidden = true;
+    if(!state.students.length) $('cgNumMake').click(); else renderNumPanel();
+  });
+  $('cgNumClose').addEventListener('click', function(){ $('cgNum').hidden = true; });
+  $('cgNumMake').addEventListener('click', function(){
+    var n = Math.min(60, Math.max(2, parseInt($('cgNumTotal').value,10) || 28));
+    if(state.students.length && !confirm("지금 명단("+state.students.length+"명)을 지우고 1~"+n+"번 번호판을 새로 만들까요?")) return;
+    state.students = []; for(var i=1;i<=n;i++) state.students.push({id:newId(), num:String(i), name:numName(i), field:"", field2:"", rawField:"", major:"", major2:""});
+    state.groups = []; state.raw = ""; $('cgRaw').value = "";
+    if(!paint && state.fields[0]) paint = state.fields[0].name;
+    save(); renderStudents(); renderGroups(); renderNumPanel();
+    say("1번부터 "+n+"번까지 번호판을 만들었습니다.");
+  });
+  $('cgPalette').addEventListener('click', function(e){
+    var b = e.target.closest('[data-pal]'); if(!b) return;
+    paint = b.dataset.pal; renderNumPanel();
+  });
+  $('cgNumGrid').addEventListener('click', function(e){
+    var b = e.target.closest('[data-sid]'); if(!b) return;
+    var s = state.students.filter(function(x){ return x.id===b.dataset.sid; })[0]; if(!s) return;
+    s.field = (s.field === paint) ? "" : paint;      // 같은 색 다시 누르면 미정
+    if(s.field2 === s.field) s.field2 = "";
+    s.rawField = ""; s.major = "";
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field = s.field; m.field2 = s.field2; m.major = ""; } }); });
+    save(); renderStudents(); renderNumPanel();
+  });
   $('cgFile').addEventListener('change', function(e){
     var f = e.target.files[0]; if(!f) return; e.target.value = "";
     var isExcel = /\.(xlsx|xls|xlsm)$/i.test(f.name);
@@ -2193,8 +2270,9 @@
           opts += '<option value=""'+(m.role?'':' selected')+'>-</option>';
           var sub = [m.major, m.field2 ? '관심 '+(m.major2||m.field2) : ''].filter(Boolean).map(esc).join(" · ");
           if(sub) sub = '<br><span class="cg-f2">'+sub+'</span>';
-          return '<div class="cg-member" draggable="true" data-m="'+m.id+'"><span class="cg-num">'+esc(m.num)+'</span>'+
-            '<span class="cg-name">'+esc(m.name)+' '+sub+'</span>'+chip(m.field)+
+          var nameHtml = isNumOnly(m) ? '<b>'+esc(m.name)+'</b>' : esc(m.name);
+          return '<div class="cg-member" draggable="true" data-m="'+m.id+'">'+(isNumOnly(m) ? '' : '<span class="cg-num">'+esc(m.num)+'</span>')+
+            '<span class="cg-name">'+nameHtml+' '+sub+'</span>'+chip(m.field)+
             '<select data-role aria-label="역할">'+opts+'</select></div>';
         }).join("")+'</div></div>';
     }).join("");
