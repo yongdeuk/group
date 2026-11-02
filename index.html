@@ -633,6 +633,70 @@
   @media (max-width: 560px){
     .panel{ padding: 14px; }
   }
+
+  /* ===== 진로 모둠 탭 ===== */
+  .howto[hidden]{ display:none !important; }
+  .cg-card{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: var(--shadow); padding: 16px 18px;
+  }
+  .cg-card h2{ font-family:'Fredoka','Work Sans',sans-serif; font-weight:600; font-size:1.1rem; margin:0 0 6px; color:var(--ink); }
+  .cg-step{ display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-size:.8rem; margin-right:6px; vertical-align:2px; }
+  .cg-hint{ color:var(--ink-muted); font-size:.84rem; line-height:1.55; margin:4px 0 10px; }
+  .cg-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  @media (max-width: 760px){ .cg-grid{ grid-template-columns:1fr; } }
+  .cg-row{ display:flex; gap:8px 10px; flex-wrap:wrap; align-items:center; }
+  #careerSection textarea{
+    width:100%; min-height:200px; resize:vertical; padding:10px; border-radius:10px;
+    border:1px solid var(--border); background:var(--bg); color:var(--ink);
+    font-family:'Space Mono',ui-monospace,monospace; font-size:.8rem;
+  }
+  #careerSection input[type=text], #careerSection select, #careerSection input[type=number]{
+    font:inherit; font-size:.86rem; padding:6px 8px; border-radius:8px;
+    border:1px solid var(--border); background:var(--bg); color:var(--ink);
+  }
+  #careerSection input[type=number]{ width:62px; }
+  #careerSection label{ font-size:.88rem; color:var(--ink); }
+  .cg-table-wrap{ max-height:360px; overflow:auto; margin-top:8px; }
+  .cg-table{ border-collapse:collapse; width:100%; font-size:.86rem; }
+  .cg-table th, .cg-table td{ border-bottom:1px solid var(--border); padding:5px 6px; text-align:left; }
+  .cg-table th{ color:var(--ink-muted); font-weight:600; font-size:.8rem; position:sticky; top:0; background:var(--surface); }
+  .cg-chip{ display:inline-block; padding:1px 9px; border-radius:999px; font-size:.74rem; font-weight:700; color:#fff; white-space:nowrap; }
+  .cg-chip.undecided{ background:transparent !important; color:var(--ink-muted); border:1px dashed var(--ink-muted); }
+  .cg-stats{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .cg-stat{ border:1px solid var(--border); border-radius:9px; padding:4px 9px; font-size:.82rem; background:var(--bg); }
+  .cg-warn{ background: color-mix(in srgb, var(--order-accent) 14%, var(--surface)); border:1px solid color-mix(in srgb, var(--order-accent) 45%, var(--border)); color:var(--ink); border-radius:10px; padding:8px 12px; font-size:.84rem; margin-top:10px; }
+  .cg-x{ border:none; background:transparent; color:var(--danger); cursor:pointer; font-size:.95rem; padding:2px 6px; }
+  .cg-groups{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+  .cg-group{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:16px 12px 12px; display:flex; flex-direction:column; overflow:hidden; }
+  .cg-group .cg-bar{ position:absolute; left:0; right:0; top:0; height:6px; }
+  .cg-group.cg-over{ outline:3px dashed var(--accent); outline-offset:-3px; }
+  .cg-ghead{ display:flex; align-items:center; gap:4px; }
+  .cg-ghead input{ flex:1; min-width:0; font-weight:700 !important; font-size:.95rem !important; border-color:transparent !important; background:transparent !important; }
+  .cg-ghead input:hover, .cg-ghead input:focus{ border-color:var(--border) !important; }
+  .cg-count{ font-size:.78rem; color:var(--ink-muted); white-space:nowrap; }
+  .cg-count.bad{ color:var(--danger); font-weight:700; }
+  .cg-topic{ display:flex; gap:4px; margin:6px 0 8px; }
+  .cg-topic input{ flex:1; min-width:0; }
+  .cg-members{ min-height:44px; flex:1; display:flex; flex-direction:column; gap:5px; }
+  .cg-member{ display:flex; align-items:center; gap:6px; padding:5px 7px; border:1px solid var(--border); border-radius:9px; background:var(--bg); cursor:grab; font-size:.88rem; }
+  .cg-member:active{ cursor:grabbing; }
+  .cg-member .cg-num{ font-family:'Space Mono',monospace; font-size:.75rem; color:var(--ink-muted); min-width:20px; }
+  .cg-member .cg-name{ flex:1; min-width:0; }
+  .cg-member .cg-f2{ font-size:.7rem; color:var(--ink-muted); }
+  .cg-member select{ font-size:.74rem !important; padding:2px 3px !important; max-width:96px; }
+  .cg-fieldrow{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .cg-fieldrow input[type=color]{ width:32px; height:30px; padding:0; border:none; background:none; }
+  .cg-fieldrow .cg-keys{ flex:1; min-width:0; }
+  #careerSection details summary{ cursor:pointer; font-weight:600; color:var(--ink); }
+  .cg-topics ul{ margin:4px 0 10px; padding-left:20px; font-size:.86rem; }
+  @media print{
+    body.cg-printing .page > :not(#careerSection),
+    body.cg-printing #careerSection .cg-noprint{ display:none !important; }
+    body.cg-printing{ background:#fff; }
+    body.cg-printing .cg-groups{ grid-template-columns:repeat(3,1fr); }
+    body.cg-printing .cg-group{ break-inside:avoid; box-shadow:none; }
+  }
 </style>
 
 <div class="page">
@@ -642,6 +706,7 @@
       <div class="tabs" role="tablist">
         <button type="button" class="tab active" id="boardTab" role="tab" aria-selected="true" aria-controls="boardSection">자리 배치</button>
         <button type="button" class="tab" id="orderTab" role="tab" aria-selected="false" aria-controls="orderSection">모둠별 발표</button>
+        <button type="button" class="tab" id="careerTab" role="tab" aria-selected="false" aria-controls="careerSection">진로 모둠</button>
       </div>
     </div>
     <div class="howto">
@@ -756,6 +821,88 @@
         </div>
       </div></div>
     </div>
+  </section>
+
+
+  <section class="view" id="careerSection" role="tabpanel" aria-labelledby="careerTab" hidden>
+    <div class="cg-grid cg-noprint">
+      <div class="cg-card">
+        <h2><span class="cg-step">1</span>학생 명단 붙여넣기</h2>
+        <p class="cg-hint">엑셀·구글 시트에서 <b>번호 / 이름 / 희망 계열 / 관심 계열(선택)</b>을 복사해 붙여넣으세요.<br>
+        "공대", "간호", "교대"처럼 써도 가까운 계열로 인식해요. 진로가 정해지지 않았다면 <b>미정</b>이라고 쓰거나 비워두세요. 미정이어도 관심 계열이 있으면 적어주면 좋아요.</p>
+        <textarea id="cgRaw" placeholder="번호	이름	희망 계열	관심 계열
+1	김민준	공학	자연
+2	이서연	미정	의약
+3	박지호	미정"></textarea>
+        <div class="cg-row" style="margin-top:10px">
+          <button type="button" class="action primary" id="cgParse">명단 불러오기</button>
+          <button type="button" class="action secondary" id="cgSample">예시 데이터</button>
+          <label class="action secondary" style="cursor:pointer">CSV 파일<input type="file" id="cgFile" accept=".csv,.txt,.tsv" hidden></label>
+          <button type="button" class="action secondary" id="cgClear">모두 지우기</button>
+        </div>
+      </div>
+      <div class="cg-card">
+        <h2>불러온 학생 <span class="cg-count" id="cgStuCount"></span></h2>
+        <div class="cg-stats" id="cgStats"></div>
+        <div id="cgParseWarn"></div>
+        <div class="cg-table-wrap">
+          <table class="cg-table" id="cgStuTable"><thead><tr><th>번호</th><th>이름</th><th>희망 계열</th><th>관심 계열</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="cg-card cg-noprint">
+      <h2><span class="cg-step">2</span>모둠 규칙</h2>
+      <div class="cg-row" style="margin:6px 0 10px">
+        <label>모둠 인원 <b>최소</b> <input type="number" id="cgMin" min="2" max="5" value="2"></label>
+        <label><b>최대</b> <input type="number" id="cgMax" min="2" max="8" value="5"></label>
+        <label>되도록 <input type="number" id="cgTarget" min="2" max="8" value="4"> 명씩</label>
+      </div>
+      <div class="cg-row" style="margin-bottom:8px">
+        <label for="cgUndecided"><b>진로 미정</b> 학생은</label>
+        <select id="cgUndecided">
+          <option value="interest">관심 계열이 있으면 그 모둠에, 없으면 '진로 탐색 모둠'으로</option>
+          <option value="explore">모두 '진로 탐색 모둠'으로 따로 모으기</option>
+          <option value="spread">인원이 적은 모둠에 골고루 나누기</option>
+        </select>
+      </div>
+      <div class="cg-row" style="margin-bottom:8px">
+        <label><input type="checkbox" id="cgUse2nd" checked> 인원이 너무 적은 계열 학생은 관심 계열 모둠에 우선 배치</label>
+      </div>
+      <div class="cg-row" style="margin-bottom:8px">
+        <label><input type="checkbox" id="cgRoles" checked> 역할 자동 배정</label>
+        <input type="text" id="cgRoleList" style="flex:1;min-width:220px" value="모둠장, 자료조사, 보고서 작성, 발표, 시각자료(PPT)" title="역할 목록 (쉼표로 구분)">
+      </div>
+      <details>
+        <summary>계열 목록·인식 단어 고치기</summary>
+        <p class="cg-hint">같은 <b>그룹 번호</b>끼리는 가까운 계열로 보고 융합 모둠을 만들 때 먼저 묶어요.</p>
+        <div id="cgFieldList"></div>
+        <div class="cg-row">
+          <button type="button" class="action secondary small" id="cgAddField">+ 계열 추가</button>
+          <button type="button" class="action secondary small" id="cgResetFields">기본값으로</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="cg-card cg-noprint">
+      <h2><span class="cg-step">3</span>모둠 만들기</h2>
+      <div class="cg-row">
+        <button type="button" class="action primary" id="cgMake">🎲 진로 모둠 편성</button>
+        <button type="button" class="action secondary" id="cgAddGroup">+ 빈 모둠</button>
+        <button type="button" class="action secondary" id="cgReRoles">역할 다시 뽑기</button>
+        <button type="button" class="action secondary" id="cgCSV">엑셀(CSV) 저장</button>
+        <button type="button" class="action secondary" id="cgPrint">인쇄 / PDF</button>
+      </div>
+      <p class="cg-hint" style="margin-bottom:0">학생 카드를 <b>끌어다 놓아</b> 다른 모둠으로 옮길 수 있어요. 모둠 이름·주제는 눌러서 고치고, 💡를 누르면 계열에 맞는 보고서 주제를 추천해요. 작업 내용은 이 브라우저에 자동 저장돼요.</p>
+    </div>
+
+    <div id="cgResultWarn"></div>
+    <div class="cg-groups" id="cgGroups"></div>
+
+    <details class="cg-card cg-noprint cg-topics">
+      <summary>계열별 보고서 주제 예시 보기</summary>
+      <div class="cg-grid" id="cgTopicList" style="margin-top:10px"></div>
+    </details>
   </section>
 
   <p class="sr-only" role="status" aria-live="polite" id="liveMsg"></p>
@@ -1472,20 +1619,498 @@
     liveMsg.textContent = state.feedbackEnabled ? '피드백 시간을 켰습니다.' : '피드백 시간을 껐습니다.';
   });
 
+  var careerTab = document.getElementById('careerTab');
+  var careerSection = document.getElementById('careerSection');
+  var howtoBox = document.querySelector('.howto');
   function activateTab(which){
-    var isBoard = which === 'board';
-    boardTab.classList.toggle('active', isBoard);
-    orderTab.classList.toggle('active', !isBoard);
-    boardTab.setAttribute('aria-selected', isBoard ? 'true' : 'false');
-    orderTab.setAttribute('aria-selected', !isBoard ? 'true' : 'false');
-    boardSection.hidden = !isBoard;
-    orderSection.hidden = isBoard;
+    [['board', boardTab, boardSection], ['order', orderTab, orderSection], ['career', careerTab, careerSection]].forEach(function(t){
+      var on = t[0] === which;
+      t[1].classList.toggle('active', on);
+      t[1].setAttribute('aria-selected', on ? 'true' : 'false');
+      t[2].hidden = !on;
+    });
+    if(howtoBox) howtoBox.hidden = which === 'career';
   }
   boardTab.addEventListener('click', function(){ activateTab('board'); });
   orderTab.addEventListener('click', function(){ activateTab('order'); });
+  careerTab.addEventListener('click', function(){ activateTab('career'); });
 
   renderBoard(false);
   rebuildSequence();
   goToStep(0);
+})();
+</script>
+<script>
+/* ===== 진로 모둠 탭 ===== */
+(function(){
+  var STORE_KEY = 'career-groups-v1';
+  var UNDECIDED_WORDS = /^(미정|미결정|모름|모르겠음|없음|고민중?|탐색중?|아직|\?+|-|x|X)$/;
+  var DEFAULT_FIELDS = [
+    {name:"인문", color:"#D9480F", family:1, keys:"인문,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역"},
+    {name:"사회", color:"#C08A2C", family:1, keys:"사회,경영,경제,법,행정,정치,외교,심리,미디어,신문방송,언론,회계,무역,광고,경찰,사회복지"},
+    {name:"교육", color:"#C2255C", family:1, keys:"교육,교대,사범,교사,유아교육,초등,특수교육,상담"},
+    {name:"자연", color:"#2F9E44", family:2, keys:"자연,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학"},
+    {name:"공학", color:"#1C7ED6", family:2, keys:"공학,공대,컴퓨터,소프트웨어,SW,AI,인공지능,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,정보,데이터,IT,개발,게임"},
+    {name:"의약", color:"#0C8599", family:2, keys:"의약,의학,의대,의사,치의,한의,약학,약대,간호,보건,물리치료,임상,수의,방사선,응급구조,치위생"},
+    {name:"예체능", color:"#7048E8", family:3, keys:"예체능,예술,미술,음악,체육,디자인,연극,영화,무용,실용음악,스포츠,웹툰,애니,패션,사진,작곡,뷰티,요리,조리"}
+  ];
+  var EXPLORE = "진로 탐색";
+  var TOPICS = {
+    "인문":["AI 번역 시대, 외국어 학습은 여전히 필요한가","신조어와 세대 간 소통의 변화","고전 문학 속 인물로 본 현대인의 고민","지역 방언 보존의 필요성과 방법","역사 왜곡 사례와 올바른 역사 인식"],
+    "사회":["청소년 경제 교육의 필요성과 방안","플랫폼 노동과 노동자의 권리","가짜 뉴스 판별과 미디어 리터러시","저출생 대응 정책 비교 분석","촉법소년 연령 하향 논쟁"],
+    "교육":["AI 디지털 교과서의 장단점","고교학점제와 진로 선택","학교 폭력 예방 프로그램 비교","에듀테크가 바꾸는 미래 교실","다문화 학생을 위한 교육 지원"],
+    "자연":["기후 위기와 우리 지역 생태계 변화","미세플라스틱이 생물에 미치는 영향","유전자 가위 기술의 가능성과 윤리","대체 식품(배양육·곤충식)의 미래","우리 학교 에너지 사용량 분석"],
+    "공학":["생성형 AI의 원리와 사회적 영향","자율주행차 사고의 책임은 누구에게","신재생 에너지 기술 비교","스마트시티와 개인정보 보호","반도체 산업과 국가 경쟁력"],
+    "의약":["감염병 대응과 공중보건 시스템","원격 의료 도입 찬반","청소년 수면 부족과 건강","신약 개발 과정과 임상시험 윤리","고령화 사회와 돌봄 기술"],
+    "예체능":["AI 창작물의 저작권은 누구에게","K-콘텐츠의 세계화 전략","스포츠 속 과학과 데이터 분석","유니버설 디자인 사례 탐구","공연 예술의 디지털 전환"],
+    "진로 탐색":["10년 후 새로 생길 직업과 사라질 직업","모둠원 관심 직업 3가지 비교 탐색","이름은 비슷하지만 다른 학과 비교하기","나의 강점·흥미 검사로 어울리는 계열 찾기","우리 지역 직업인 인터뷰 보고서"]
+  };
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+  var state = {
+    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS),
+    settings:{min:2, max:5, target:4, undecided:"interest", use2nd:true, roles:true, roleList:"모둠장, 자료조사, 보고서 작성, 발표, 시각자료(PPT)"}
+  };
+  function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+  try{
+    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if(saved && saved.students){
+      var st = Object.assign({}, state.settings, saved.settings);
+      state = Object.assign(state, saved); state.settings = st;
+    }
+  }catch(e){}
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function shuffle(a){ a = a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function uniq(a){ return a.filter(function(x,i){ return x && a.indexOf(x)===i; }); }
+  var live = $('liveMsg');
+  function say(msg){ if(live) live.textContent = msg; }
+  var uidN = 0; function newId(p){ return (p||"s") + Date.now().toString(36) + (uidN++); }
+
+  function fieldOf(name){ for(var i=0;i<state.fields.length;i++) if(state.fields[i].name===name) return state.fields[i]; return null; }
+  function colorOf(name){ var f = fieldOf(name); return f ? f.color : "#868E96"; }
+  function chip(name, extra){
+    if(!name) return '<span class="cg-chip undecided">미정</span>';
+    if(name===EXPLORE) return '<span class="cg-chip undecided">'+EXPLORE+'</span>';
+    return '<span class="cg-chip" style="background:'+colorOf(name)+'">'+esc(name)+(extra||"")+'</span>';
+  }
+  /* 실제로 모둠 성격을 정하는 계열: 희망 계열, 미정이면 관심 계열 */
+  function effField(s){ return s.field || s.field2 || ""; }
+
+  function normalizeField(txt){
+    if(txt == null) return "";
+    var t = String(txt).replace(/\s|계열/g, "");
+    if(!t || UNDECIDED_WORDS.test(t)) return "";
+    var best = "", bestLen = 0;
+    state.fields.forEach(function(f){
+      if(t === f.name){ best = f.name; bestLen = 999; }
+      [f.name].concat(f.keys.split(",")).forEach(function(k){
+        k = k.trim(); if(!k) return;
+        if(t.toUpperCase().indexOf(k.toUpperCase()) >= 0 && k.length > bestLen){ best = f.name; bestLen = k.length; }
+      });
+    });
+    return best;
+  }
+
+  /* ---------- 학생 입력 ---------- */
+  function parseRaw(text){
+    var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+    var out = [];
+    lines.forEach(function(line, idx){
+      if(idx===0 && /이름|성명|name/i.test(line)) return;
+      var cols = line.split(line.indexOf("\t")>=0 ? "\t" : /[,;]/).map(function(c){ return c.trim().replace(/^"|"$/g,""); });
+      var num, name, f1, f2;
+      if(/^\d+$/.test(cols[0])){ num=cols[0]; name=cols[1]; f1=cols[2]; f2=cols[3]; }
+      else { num=String(out.length+1); name=cols[0]; f1=cols[1]; f2=cols[2]; }
+      if(!name) return;
+      var n1 = normalizeField(f1), n2 = normalizeField(f2);
+      var unknown = !!(f1 && !n1 && !UNDECIDED_WORDS.test(String(f1).replace(/\s|계열/g,"")));
+      out.push({id:newId(), num:num, name:name, field:n1, field2:(n2 && n2!==n1)?n2:"", rawField: unknown ? f1 : ""});
+    });
+    return out;
+  }
+  function fieldOptions(sel, emptyLabel){
+    return '<option value="">'+emptyLabel+'</option>' + state.fields.map(function(f){ return '<option'+(f.name===sel?' selected':'')+'>'+esc(f.name)+'</option>'; }).join("");
+  }
+  function renderStudents(){
+    $('cgStuTable').tBodies[0].innerHTML = state.students.map(function(s){
+      return '<tr data-id="'+s.id+'"><td>'+esc(s.num)+'</td><td>'+esc(s.name)+'</td>'+
+        '<td><select data-k="field">'+fieldOptions(s.field,"미정")+'</select></td>'+
+        '<td><select data-k="field2">'+fieldOptions(s.field2,"-")+'</select></td>'+
+        '<td><button type="button" class="cg-x" data-del title="삭제">✕</button></td></tr>';
+    }).join("");
+    $('cgStuCount').textContent = state.students.length ? "("+state.students.length+"명)" : "";
+    var cnt = {}, order = [];
+    state.students.forEach(function(s){ var k = s.field || ""; if(!(k in cnt)){ cnt[k]=0; order.push(k); } cnt[k]++; });
+    order.sort(function(a,b){ return (a==="")-(b==="") || state.fields.indexOf(fieldOf(a))-state.fields.indexOf(fieldOf(b)); });
+    $('cgStats').innerHTML = order.map(function(k){ return '<span class="cg-stat">'+chip(k)+' '+cnt[k]+'명</span>'; }).join("");
+    var unk = state.students.filter(function(s){ return !s.field && s.rawField; });
+    var und = state.students.filter(function(s){ return !s.field; });
+    var html = "";
+    if(unk.length) html += '<div class="cg-warn">계열을 알아보지 못한 학생: '+unk.map(function(s){ return esc(s.name)+'("'+esc(s.rawField)+'")'; }).join(", ")+' — 표에서 직접 고르거나, 아래 [계열 목록·인식 단어 고치기]에 단어를 추가하세요. 지금은 미정으로 처리돼요.</div>';
+    if(und.length) html += '<div class="cg-warn" style="background:var(--bg);border-color:var(--border)">진로 미정 '+und.length+'명 (관심 계열 있음 '+und.filter(function(s){return s.field2;}).length+'명) — 처리 방법은 ② 모둠 규칙에서 고를 수 있어요.</div>';
+    $('cgParseWarn').innerHTML = html;
+  }
+  $('cgStuTable').addEventListener('change', function(e){
+    var tr = e.target.closest('tr'); if(!tr) return;
+    var s = state.students.filter(function(x){ return x.id===tr.dataset.id; })[0];
+    s[e.target.dataset.k] = e.target.value; s.rawField = "";
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field=s.field; m.field2=s.field2; } }); });
+    save(); renderStudents(); renderGroups();
+  });
+  $('cgStuTable').addEventListener('click', function(e){
+    if(!e.target.matches('[data-del]')) return;
+    var id = e.target.closest('tr').dataset.id;
+    state.students = state.students.filter(function(s){ return s.id!==id; });
+    state.groups.forEach(function(g){ g.members = g.members.filter(function(m){ return m.id!==id; }); });
+    save(); renderStudents(); renderGroups();
+  });
+  $('cgParse').addEventListener('click', function(){
+    var text = $('cgRaw').value;
+    if(!text.trim()){ alert("학생 명단을 붙여넣어 주세요."); return; }
+    var list = parseRaw(text);
+    if(state.students.length && !confirm("기존 명단("+state.students.length+"명)을 새 명단("+list.length+"명)으로 바꿀까요? 만든 모둠도 지워집니다.")) return;
+    state.raw = text; state.students = list; state.groups = [];
+    save(); renderStudents(); renderGroups(); say(list.length+"명을 불러왔습니다.");
+  });
+  $('cgFile').addEventListener('change', function(e){
+    var f = e.target.files[0]; if(!f) return;
+    f.arrayBuffer().then(function(buf){
+      var text = new TextDecoder("utf-8").decode(buf);
+      if(text.indexOf("�")>=0){ try{ text = new TextDecoder("euc-kr").decode(buf); }catch(err){} }
+      $('cgRaw').value = text; e.target.value = "";
+      say("파일 내용을 넣었습니다. 명단 불러오기를 누르세요.");
+    });
+  });
+  $('cgSample').addEventListener('click', function(){
+    var names = "김민준,이서연,박지호,최서윤,정도윤,강하은,조예준,윤지우,장시우,임수아,한주원,오지민,서건우,신채원,권현우,황다은,안유준,송서현,류은우,홍하린,전지환,고나은,문도현,양소율,배준서,백예린,허민재,남가윤".split(",");
+    var rows = [["공학","자연"],["공학",""],["공대 컴퓨터","자연"],["공학","예체능"],["공학",""],["의약","자연"],["간호","교육"],["의약",""],["의약","자연"],["자연","의약"],["자연","공학"],["사회","인문"],["경영",""],["사회","교육"],["사회",""],["인문","사회"],["교육","인문"],["교대",""],["예체능","공학"],["미정","의약"],["미정","공학"],["미정","사회"],["미정",""],["미정",""],["미정",""],["모름","예체능"],["",""],["미정",""]];
+    rows = shuffle(rows);
+    $('cgRaw').value = "번호\t이름\t희망 계열\t관심 계열\n" + names.map(function(n,i){ return (i+1)+"\t"+n+"\t"+rows[i][0]+"\t"+rows[i][1]; }).join("\n");
+    say("예시 데이터를 넣었습니다. 명단 불러오기를 누르세요.");
+  });
+  $('cgClear').addEventListener('click', function(){
+    if(!confirm("학생 명단과 진로 모둠 결과를 모두 지울까요?")) return;
+    state.raw=""; state.students=[]; state.groups=[]; $('cgRaw').value="";
+    save(); renderStudents(); renderGroups();
+  });
+
+  /* ---------- 설정 ---------- */
+  function renderSettings(){
+    var S = state.settings;
+    $('cgMin').value=S.min; $('cgMax').value=S.max; $('cgTarget').value=S.target;
+    $('cgUndecided').value=S.undecided; $('cgUse2nd').checked=S.use2nd; $('cgRoles').checked=S.roles; $('cgRoleList').value=S.roleList;
+    $('cgFieldList').innerHTML = state.fields.map(function(f,i){
+      return '<div class="cg-fieldrow" data-i="'+i+'">'+
+        '<input type="color" value="'+f.color+'" data-k="color" aria-label="색">'+
+        '<input type="text" value="'+esc(f.name)+'" data-k="name" style="width:80px" aria-label="계열 이름">'+
+        '<label title="가까운 계열 그룹">그룹 <input type="number" value="'+f.family+'" data-k="family" min="1" max="9" style="width:50px"></label>'+
+        '<input type="text" class="cg-keys" value="'+esc(f.keys)+'" data-k="keys" aria-label="인식 단어(쉼표 구분)">'+
+        '<button type="button" class="cg-x" data-delf title="삭제">✕</button></div>';
+    }).join("");
+  }
+  function readSettings(){
+    var S = state.settings;
+    S.min = Math.min(8, Math.max(1, parseInt($('cgMin').value,10) || 2));
+    S.max = Math.min(10, Math.max(S.min, parseInt($('cgMax').value,10) || 5));
+    S.target = Math.min(S.max, Math.max(S.min, parseInt($('cgTarget').value,10) || 4));
+    S.undecided = $('cgUndecided').value; S.use2nd = $('cgUse2nd').checked; S.roles = $('cgRoles').checked; S.roleList = $('cgRoleList').value;
+    save();
+  }
+  ['cgMin','cgMax','cgTarget','cgUndecided','cgUse2nd','cgRoles','cgRoleList'].forEach(function(id){
+    $(id).addEventListener('change', function(){ readSettings(); renderSettings(); renderGroups(); });
+  });
+  $('cgFieldList').addEventListener('change', function(e){
+    var row = e.target.closest('.cg-fieldrow'); if(!row) return;
+    var f = state.fields[+row.dataset.i], k = e.target.dataset.k, old = f.name;
+    f[k] = k==="family" ? (+e.target.value||9) : e.target.value.trim();
+    if(k==="name" && old!==f.name){
+      var fix = function(s){ if(s.field===old) s.field=f.name; if(s.field2===old) s.field2=f.name; };
+      state.students.forEach(fix);
+      state.groups.forEach(function(g){ g.members.forEach(fix); });
+    }
+    save(); renderStudents(); renderGroups();
+  });
+  $('cgFieldList').addEventListener('click', function(e){
+    if(!e.target.matches('[data-delf]')) return;
+    var f = state.fields[+e.target.closest('.cg-fieldrow').dataset.i];
+    if(!confirm("'"+f.name+"' 계열을 삭제할까요? 이 계열 학생은 미정이 됩니다.")) return;
+    state.fields = state.fields.filter(function(x){ return x!==f; });
+    var fix = function(s){ if(s.field===f.name) s.field=""; if(s.field2===f.name) s.field2=""; };
+    state.students.forEach(fix); state.groups.forEach(function(g){ g.members.forEach(fix); });
+    save(); renderSettings(); renderStudents(); renderGroups();
+  });
+  $('cgAddField').addEventListener('click', function(){ state.fields.push({name:"새 계열", color:"#495057", family:9, keys:""}); save(); renderSettings(); });
+  $('cgResetFields').addEventListener('click', function(){
+    if(!confirm("계열 설정을 기본값으로 되돌릴까요?")) return;
+    state.fields = clone(DEFAULT_FIELDS); save(); renderSettings(); renderStudents(); renderGroups();
+  });
+
+  /* ---------- 편성 알고리즘 ---------- */
+  function splitCount(n, S){
+    var k = Math.max(1, Math.round(n / S.target));
+    k = Math.min(k, Math.max(1, Math.floor(n / S.min)));
+    return Math.max(k, Math.ceil(n / S.max));   // 최대 인원은 반드시 지키기 (부족분은 나중에 채움)
+  }
+  function chunkEven(arr, k){
+    var out = []; for(var i=0;i<k;i++) out.push([]);
+    arr.forEach(function(x,i){ out[i%k].push(x); });
+    return out;
+  }
+  function famOf(name){ var f = fieldOf(name); return f ? f.family : 99; }
+
+  function makeGroups(){
+    readSettings();
+    var S = state.settings;
+    if(!state.students.length){ alert("먼저 ① 학생 명단을 불러오세요."); return; }
+    var studs = state.students.map(function(s){ return {id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, role:""}; });
+    var groups = [], leftovers = [], explore = [], spread = [];
+
+    // 미정 학생 분류
+    var pools = {};
+    studs.forEach(function(s){
+      var key = s.field;
+      if(!s.field){
+        if(S.undecided==="interest" && s.field2) key = s.field2;
+        else if(S.undecided==="spread"){ spread.push(s); return; }
+        else { explore.push(s); return; }
+      }
+      (pools[key] = pools[key] || []).push(s);
+    });
+
+    // 1) 같은 계열끼리 (최소 인원 이상일 때)
+    state.fields.forEach(function(f){
+      var list = shuffle(pools[f.name] || []);
+      if(!list.length) return;
+      if(list.length >= S.min) chunkEven(list, splitCount(list.length, S)).forEach(function(m){ groups.push({kind:"field", fields:[f.name], members:m}); });
+      else leftovers = leftovers.concat(list);
+    });
+    function room(g){ return S.max - g.members.length; }
+
+    // 2) 계열 인원이 부족한 학생 → 관심 계열 모둠에 자리 있으면
+    if(S.use2nd){
+      leftovers = shuffle(leftovers).filter(function(s){
+        var alt = s.field ? s.field2 : "";
+        if(!alt) return true;
+        var cand = groups.filter(function(g){ return g.kind==="field" && g.fields[0]===alt && room(g)>0; })
+                         .sort(function(a,b){ return a.members.length-b.members.length; })[0];
+        if(cand){ cand.members.push(s); return false; }
+        return true;
+      });
+    }
+
+    // 3) 남은 학생 → 가까운 계열끼리 융합 모둠
+    var rest = [];
+    if(leftovers.length >= S.min){
+      var fam = {};
+      shuffle(leftovers).forEach(function(s){ var k = famOf(effField(s)); (fam[k] = fam[k] || []).push(s); });
+      Object.keys(fam).forEach(function(k){
+        var list = fam[k];
+        if(list.length >= S.min) chunkEven(list, splitCount(list.length, S)).forEach(function(m){ groups.push({kind:"fusion", members:m}); });
+        else rest = rest.concat(list);
+      });
+      if(rest.length >= S.min){
+        chunkEven(rest, splitCount(rest.length, S)).forEach(function(m){ groups.push({kind:"fusion", members:m}); });
+        rest = [];
+      }
+    } else rest = leftovers;
+
+    // 4) 진로 탐색 모둠
+    if(explore.length >= S.min || (explore.length && !groups.length)){
+      chunkEven(shuffle(explore), splitCount(explore.length, S)).forEach(function(m){ groups.push({kind:"explore", members:m}); });
+    } else spread = spread.concat(explore);
+
+    // 5) 마지막 남은 학생: 비슷한 계열 → 인원 적은 모둠
+    shuffle(rest).concat(shuffle(spread)).forEach(function(s){
+      var ef = effField(s), fm = famOf(ef);
+      function score(g){
+        var full = room(g) > 0 ? 0 : 1;
+        var gfs = g.members.map(effField);
+        var same = ef && gfs.indexOf(ef) >= 0 ? 0 : 1;
+        var near = ef && gfs.some(function(x){ return famOf(x)===fm; }) ? 0 : 1;
+        if(!ef && g.kind==="explore") same = 0;
+        return full*1000 + same*100 + near*10 + g.members.length;
+      }
+      var g = groups.slice().sort(function(a,b){ return score(a)-score(b); })[0];
+      if(g && room(g) > 0) g.members.push(s);
+      else groups.push({kind: ef ? "fusion" : "explore", members:[s]});   // 모두 꽉 찼으면 새 모둠
+    });
+
+    // 6) 최소 인원보다 적은 모둠은 큰 모둠에서 (미정·다른 계열 학생 우선) 데려와 채우기
+    groups.forEach(function(g){
+      var gf = uniq(g.members.map(effField));
+      while(g.members.length < S.min){
+        var donor = groups.filter(function(d){ return d!==g && d.members.length > S.min; })
+                          .sort(function(a,b){ return b.members.length-a.members.length; })[0];
+        if(!donor) break;
+        var pickIdx = 0, best = 99;
+        donor.members.forEach(function(m,i){
+          var ef = effField(m);
+          var sc = (gf.indexOf(ef)>=0 ? 0 : 2) + (m.field ? 1 : 0);
+          if(sc < best){ best = sc; pickIdx = i; }
+        });
+        g.members.push(donor.members.splice(pickIdx,1)[0]);
+      }
+    });
+    groups = groups.filter(function(g){ return g.members.length; });
+
+    // 이름 붙이기
+    var cnt = {}, total = {};
+    groups.forEach(function(g){
+      var fs = uniq(g.members.map(effField));
+      if(g.kind==="explore") g.base = EXPLORE;
+      else if(fs.length===1) g.base = fs[0];
+      else if(fs.length>1) g.base = "융합(" + fs.join("·") + ")";
+      else g.base = EXPLORE;
+      total[g.base] = (total[g.base]||0) + 1;
+    });
+    groups.sort(function(a,b){
+      var ia = a.base===EXPLORE ? 999 : (fieldOf(a.base) ? state.fields.indexOf(fieldOf(a.base)) : 500);
+      var ib = b.base===EXPLORE ? 999 : (fieldOf(b.base) ? state.fields.indexOf(fieldOf(b.base)) : 500);
+      return ia - ib;
+    });
+    state.groups = groups.map(function(g, i){
+      cnt[g.base] = (cnt[g.base]||0) + 1;
+      var title = (i+1) + "모둠 · " + g.base + (total[g.base]>1 ? " " + cnt[g.base] : "");
+      return {id:newId("g"), title:title, topic:"", members:g.members.sort(function(a,b){ return (parseInt(a.num,10)||0)-(parseInt(b.num,10)||0); })};
+    });
+    if(S.roles) assignRoles();
+    save(); renderGroups();
+    say(state.groups.length + "개 모둠을 만들었습니다.");
+  }
+  function roleList(){ return state.settings.roleList.split(",").map(function(r){ return r.trim(); }).filter(Boolean); }
+  function assignRoles(){
+    var roles = roleList();
+    state.groups.forEach(function(g){ shuffle(g.members).forEach(function(m,i){ m.role = roles[i] || "공동 조사"; }); });
+  }
+
+  /* ---------- 결과 ---------- */
+  function groupBar(g){
+    var fs = uniq(g.members.map(effField));
+    if(!fs.length) return "var(--empty-ink)";
+    if(fs.length===1) return colorOf(fs[0]);
+    return "linear-gradient(90deg," + fs.map(colorOf).join(",") + ")";
+  }
+  function renderGroups(){
+    var box = $('cgGroups'), S = state.settings;
+    if(!state.groups.length){
+      box.innerHTML = '<div class="cg-card" style="grid-column:1/-1;color:var(--ink-muted)">아직 모둠이 없어요. '+(state.students.length ? '위의 <b>🎲 진로 모둠 편성</b>을 누르세요.' : '① 학생 명단을 먼저 불러오세요.')+'</div>';
+      $('cgResultWarn').innerHTML = ""; return;
+    }
+    var roles = roleList().concat(["공동 조사"]);
+    box.innerHTML = state.groups.map(function(g){
+      var n = g.members.length, bad = n < S.min || n > S.max;
+      var fs = uniq(g.members.map(function(m){ return m.field; }));
+      var undec = g.members.filter(function(m){ return !m.field; }).length;
+      return '<div class="cg-group" data-g="'+g.id+'"><div class="cg-bar" style="background:'+groupBar(g)+'"></div>'+
+        '<div class="cg-ghead"><input type="text" value="'+esc(g.title)+'" data-gk="title" aria-label="모둠 이름">'+
+        '<span class="cg-count'+(bad?' bad':'')+'">'+n+'명</span>'+
+        '<button type="button" class="cg-x cg-noprint" data-delg title="모둠 삭제">✕</button></div>'+
+        '<div class="cg-row" style="gap:4px">'+fs.map(function(f){ return chip(f); }).join("")+(undec?'<span class="cg-chip undecided">미정 '+undec+'</span>':'')+'</div>'+
+        '<div class="cg-topic"><input type="text" placeholder="보고서 주제" value="'+esc(g.topic)+'" data-gk="topic" aria-label="보고서 주제">'+
+        '<button type="button" class="action secondary small cg-noprint" data-idea title="주제 추천">💡</button></div>'+
+        '<div class="cg-members">'+g.members.map(function(m){
+          var opts = roles.map(function(r){ return '<option'+(r===m.role?' selected':'')+'>'+esc(r)+'</option>'; }).join("");
+          if(m.role && roles.indexOf(m.role)<0) opts += '<option selected>'+esc(m.role)+'</option>';
+          opts += '<option value=""'+(m.role?'':' selected')+'>-</option>';
+          var sub = m.field2 ? '<span class="cg-f2">'+'관심 '+esc(m.field2)+'</span>' : '';
+          return '<div class="cg-member" draggable="true" data-m="'+m.id+'"><span class="cg-num">'+esc(m.num)+'</span>'+
+            '<span class="cg-name">'+esc(m.name)+' '+sub+'</span>'+chip(m.field)+
+            '<select data-role aria-label="역할">'+opts+'</select></div>';
+        }).join("")+'</div></div>';
+    }).join("");
+    var badG = state.groups.filter(function(g){ return g.members.length < S.min || g.members.length > S.max; });
+    var placed = {}; state.groups.forEach(function(g){ g.members.forEach(function(m){ placed[m.id]=1; }); });
+    var missing = state.students.filter(function(s){ return !placed[s.id]; });
+    var w = "";
+    if(badG.length) w += '<div class="cg-warn">인원 규칙('+S.min+'~'+S.max+'명)을 벗어난 모둠: '+badG.map(function(g){ return esc(g.title); }).join(", ")+' — 학생 카드를 끌어 옮겨 조정하세요.</div>';
+    if(missing.length) w += '<div class="cg-warn">모둠에 없는 학생 '+missing.length+'명: '+missing.map(function(s){ return esc(s.name); }).join(", ")+' <button type="button" class="action secondary small" data-addmissing>인원 적은 모둠에 넣기</button></div>';
+    $('cgResultWarn').innerHTML = w;
+  }
+  function findMember(id){
+    for(var i=0;i<state.groups.length;i++){ var g = state.groups[i]; for(var j=0;j<g.members.length;j++) if(g.members[j].id===id) return {g:g, i:j}; }
+    return null;
+  }
+  function groupFromEvent(e){ var el = e.target.closest('.cg-group'); return el ? state.groups.filter(function(x){ return x.id===el.dataset.g; })[0] : null; }
+
+  var gbox = $('cgGroups');
+  gbox.addEventListener('dragstart', function(e){ var m = e.target.closest('.cg-member'); if(m){ e.dataTransfer.setData('text/plain', m.dataset.m); e.dataTransfer.effectAllowed='move'; } });
+  gbox.addEventListener('dragover', function(e){
+    var el = e.target.closest('.cg-group'); if(!el) return; e.preventDefault();
+    gbox.querySelectorAll('.cg-over').forEach(function(x){ if(x!==el) x.classList.remove('cg-over'); });
+    el.classList.add('cg-over');
+  });
+  gbox.addEventListener('dragleave', function(e){ var el = e.target.closest('.cg-group'); if(el && !el.contains(e.relatedTarget)) el.classList.remove('cg-over'); });
+  gbox.addEventListener('drop', function(e){
+    var el = e.target.closest('.cg-group'); if(!el) return; e.preventDefault(); el.classList.remove('cg-over');
+    var from = findMember(e.dataTransfer.getData('text/plain')); if(!from) return;
+    var to = groupFromEvent(e); if(!to || to===from.g) return;
+    to.members.push(from.g.members.splice(from.i,1)[0]);
+    save(); renderGroups();
+  });
+  gbox.addEventListener('change', function(e){
+    var g = groupFromEvent(e); if(!g) return;
+    if(e.target.dataset.gk) g[e.target.dataset.gk] = e.target.value;
+    if(e.target.matches('[data-role]')){ var f = findMember(e.target.closest('.cg-member').dataset.m); if(f) f.g.members[f.i].role = e.target.value; }
+    save();
+  });
+  gbox.addEventListener('click', function(e){
+    var g = groupFromEvent(e); if(!g) return;
+    if(e.target.closest('[data-delg]')){
+      if(g.members.length && !confirm("'"+g.title+"'을(를) 삭제할까요? 학생 "+g.members.length+"명은 '모둠에 없는 학생'이 됩니다.")) return;
+      state.groups = state.groups.filter(function(x){ return x!==g; }); save(); renderGroups();
+    }
+    if(e.target.closest('[data-idea]')){
+      var fs = uniq(g.members.map(effField));
+      if(!fs.length || g.title.indexOf(EXPLORE)>=0) fs.push(EXPLORE);
+      var pool = []; fs.forEach(function(f){ pool = pool.concat(TOPICS[f] || []); });
+      if(!pool.length) pool = TOPICS[EXPLORE];
+      var used = state.groups.map(function(x){ return x.topic.replace(/^\[융합\] /,""); });
+      var fresh = pool.filter(function(t){ return used.indexOf(t)<0; });
+      var pick = (fresh.length ? fresh : pool); var t = pick[Math.floor(Math.random()*pick.length)];
+      g.topic = (fs.filter(function(f){ return f!==EXPLORE; }).length > 1 ? "[융합] " : "") + t;
+      save(); renderGroups();
+    }
+  });
+  $('cgResultWarn').addEventListener('click', function(e){
+    if(!e.target.matches('[data-addmissing]')) return;
+    var placed = {}; state.groups.forEach(function(g){ g.members.forEach(function(m){ placed[m.id]=1; }); });
+    state.students.filter(function(s){ return !placed[s.id]; }).forEach(function(s){
+      var g = state.groups.slice().sort(function(a,b){ return a.members.length-b.members.length; })[0];
+      if(g) g.members.push({id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, role:"공동 조사"});
+    });
+    save(); renderGroups();
+  });
+
+  $('cgMake').addEventListener('click', function(){
+    if(state.groups.length && !confirm("지금 모둠을 지우고 새로 편성할까요? (옮긴 내용·주제가 사라져요)")) return;
+    makeGroups();
+  });
+  $('cgAddGroup').addEventListener('click', function(){ state.groups.push({id:newId("g"), title:(state.groups.length+1)+"모둠", topic:"", members:[]}); save(); renderGroups(); });
+  $('cgReRoles').addEventListener('click', function(){ assignRoles(); save(); renderGroups(); say("역할을 다시 배정했습니다."); });
+  $('cgPrint').addEventListener('click', function(){
+    document.body.classList.add('cg-printing'); window.print();
+  });
+  window.addEventListener('afterprint', function(){ document.body.classList.remove('cg-printing'); });
+  $('cgCSV').addEventListener('click', function(){
+    if(!state.groups.length){ alert("먼저 모둠을 만들어 주세요."); return; }
+    var rows = [["모둠","보고서 주제","번호","이름","희망 계열","관심 계열","역할"]];
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ rows.push([g.title, g.topic, m.num, m.name, m.field||"미정", m.field2, m.role]); }); });
+    var csv = "﻿" + rows.map(function(r){ return r.map(function(c){ return '"' + String(c==null?"":c).replace(/"/g,'""') + '"'; }).join(","); }).join("\r\n");
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+    a.download = "진로모둠_" + new Date().toISOString().slice(0,10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  $('cgTopicList').innerHTML = Object.keys(TOPICS).map(function(f){
+    return '<div><div>'+chip(f)+'</div><ul>'+TOPICS[f].map(function(t){ return '<li>'+esc(t)+'</li>'; }).join("")+'</ul></div>';
+  }).join("");
+
+  $('cgRaw').value = state.raw || "";
+  renderStudents(); renderSettings(); renderGroups();
+  window.__careerGroups = {makeGroups:makeGroups, state:function(){ return state; }};
 })();
 </script>
