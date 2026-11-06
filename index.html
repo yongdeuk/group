@@ -653,6 +653,9 @@
     font-family:'Space Mono',monospace; font-weight:700; font-size:1rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; }
   .cg-numcell small{ font-family:'Work Sans',sans-serif; font-size:.62rem; font-weight:600; }
   .cg-numcell.set{ border:1px solid transparent; color:#fff; }
+  .cg-numgrid.named{ grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); }
+  .cg-numgrid.named .cg-numcell{ font-size:.8rem; }
+  .cg-cellname{ font-family:'Work Sans',sans-serif; font-weight:700; font-size:.86rem; }
   .cg-card{
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
     box-shadow: var(--shadow); padding: 16px 18px;
@@ -845,7 +848,7 @@
     <div class="cg-grid cg-noprint">
       <div class="cg-card">
         <h2><span class="cg-step">1</span>학생 명단 붙여넣기</h2>
-        <p class="cg-hint"><b>리로스쿨</b>에서 학생 명단(희망 전공·진로 포함)을 엑셀로 내려받아 <b>📂 리로스쿨 엑셀 올리기</b>를 누르면 열을 자동으로 찾아 연결해요. (.xlsx / .xls / .csv)<br>
+        <p class="cg-hint"><b>📂 엑셀 명단 올리기</b>: 학교에서 내려받은 출석부·학생 명단 엑셀을 그대로 올리면 번호·이름 열을 자동으로 찾아 불러와요. (.xlsx / .xls / .csv) 희망 전공 열이 있으면 계열도 자동으로 정하고, 없으면 계열 칠하기 판이 열려요.<br>
         또는 엑셀·구글 시트에서 <b>번호 / 이름 / 희망 계열 / 관심 계열(선택)</b>을 복사해 붙여넣으세요.<br>
         "공대", "간호", "교대"처럼 써도 가까운 계열로 인식해요. 진로가 정해지지 않았다면 <b>미정</b>이라고 쓰거나 비워두세요. 미정이어도 관심 계열이 있으면 적어주면 좋아요.</p>
         <textarea id="cgRaw" placeholder="번호	이름	희망 계열	관심 계열
@@ -853,7 +856,7 @@
 2	이서연	미정	의약
 3	박지호	미정"></textarea>
         <div class="cg-row" style="margin-top:10px">
-          <button type="button" class="action primary" id="cgFileBtn">📂 리로스쿨 엑셀 올리기</button>
+          <button type="button" class="action primary" id="cgFileBtn">📂 엑셀 명단 올리기</button>
           <button type="button" class="action primary" id="cgNumBtn">🔢 번호만으로 정하기</button>
           <input type="file" id="cgFile" accept=".xlsx,.xls,.csv,.txt,.tsv" hidden>
           <button type="button" class="action primary" id="cgParse">붙여넣은 명단 불러오기</button>
@@ -862,8 +865,8 @@
         </div>
         <div id="cgMap" class="cg-map" hidden></div>
         <div id="cgNum" class="cg-map" hidden>
-          <h3>🔢 번호만으로 정하기</h3>
-          <p class="cg-hint" style="margin-top:0">이름 없이 번호로만 모둠을 만들어요. ① 인원수를 넣고 [번호판 만들기] → ② 아래에서 계열을 고르고 → ③ 그 계열 학생 번호를 눌러 칠하세요. (예: "공학 희망 손 들어보세요" 하고 바로 누르기) 다시 누르면 미정으로 돌아가요.</p>
+          <h3 id="cgNumTitle">🔢 번호만으로 정하기</h3>
+          <p class="cg-hint" id="cgNumHint" style="margin-top:0">이름 없이 번호로만 모둠을 만들어요. ① 인원수를 넣고 [번호판 만들기] → ② 아래에서 계열을 고르고 → ③ 그 계열 학생 번호를 눌러 칠하세요. (예: "공학 희망 손 들어보세요" 하고 바로 누르기) 다시 누르면 미정으로 돌아가요.</p>
           <div class="cg-row" style="margin-bottom:10px">
             <label>총 인원 <input type="number" id="cgNumTotal" min="2" max="60" value="28"></label>
             <button type="button" class="action secondary small" id="cgNumMake">번호판 만들기</button>
@@ -1837,7 +1840,7 @@
     state.raw = text; state.students = list; state.groups = [];
     save(); renderStudents(); renderGroups(); say(list.length+"명을 불러왔습니다.");
   });
-  /* ---------- 리로스쿨 엑셀 / CSV 불러오기 ---------- */
+  /* ---------- 엑셀 / CSV 명단 불러오기 ---------- */
   var XLSX_SRC = ["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
                   "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"];
   function loadXLSX(){
@@ -1898,6 +1901,7 @@
     var f1c = h.map(function(x,i){ return i; }).filter(function(i){ return !used[i] && f2c.indexOf(i)<0 && reF1.test(h[i]); })
       .map(function(i){ return {i:i, n:hits(i) + (/전공|학과|계열/.test(h[i]) ? 0.5 : 0)}; })
       .sort(function(a,b){ return b.n-a.n; });
+    f1c = f1c.filter(function(c){ return c.n >= 1; });
     map.f1 = f1c.length ? f1c[0].i : -1;
     // 관심 열: 2지망·관심 열이 없으면 두 번째 진로 열(예: 희망 직업)을 보조로
     if(f2c.length) map.f2 = f2c[0];
@@ -1910,7 +1914,15 @@
     if(!rows.length){ alert("파일에서 내용을 찾지 못했어요."); return; }
     var hi = guessHeader(rows);
     mapState = {rows:rows, hi:hi, map:guessCols(rows[hi], rows.slice(hi+1)), fileName:fileName};
-    renderMapper();
+    // 이름 열을 찾았고 한 반짜리 명단이면 바로 적용, 아니면 열 연결 화면
+    if(mapState.map.name >= 0 && classList().length <= 1) applyMap(true);
+    else renderMapper();
+  }
+  function classList(){
+    var m = mapState, out = [];
+    if(m.map.cls < 0) return out;
+    m.rows.slice(m.hi+1).forEach(function(r){ if(!cell(r,m.map.name)) return; var v = (m.map.grade>=0 ? cell(r,m.map.grade)+"학년 " : "") + cell(r,m.map.cls)+"반"; if(cell(r,m.map.cls) && out.indexOf(v)<0) out.push(v); });
+    return out;
   }
   function renderMapper(){
     var m = mapState, head = m.rows[m.hi], body = m.rows.slice(m.hi+1);
@@ -1957,19 +1969,38 @@
   });
   $('cgMap').addEventListener('click', function(e){
     if(e.target.matches('[data-cancel]')){ $('cgMap').hidden = true; mapState = null; return; }
-    if(!e.target.matches('[data-apply]')) return;
+    if(e.target.matches('[data-remap]')){ mapState = lastMap; if(mapState) renderMapper(); return; }
+    if(e.target.matches('[data-apply]')) applyMap(false);
+  });
+  var lastMap = null;
+  function cleanNum(v){
+    v = String(v||"").trim();
+    if(/^\d+(\.0+)?$/.test(v)) v = String(parseInt(v,10));
+    else v = v.replace(/\D/g, "");
+    if(v.length >= 4) v = String(parseInt(v.slice(-2),10));   // 학번(20315) → 번호(15)
+    return v;
+  }
+  function applyMap(auto){
     var m = mapState;
     if(m.map.name < 0){ alert("이름 열을 골라 주세요."); return; }
     var clean = function(v){ return String(v).replace(/[\t\r\n]+/g, " "); };
-    var lines = selectedRows().map(function(r, i){
-      var num = cell(r, m.map.num).replace(/\D/g, "");
-      if(num.length >= 4) num = String(parseInt(num.slice(-2),10));   // 학번(20315) → 번호(15)
-      return [num || String(i+1), cell(r,m.map.name), cell(r,m.map.f1), cell(r,m.map.f2)].map(clean).join("\t");
+    var rows = selectedRows();
+    var lines = rows.map(function(r, i){
+      return [cleanNum(cell(r, m.map.num)) || String(i+1), cell(r,m.map.name), cell(r,m.map.f1), cell(r,m.map.f2)].map(clean).join("\t");
     });
+    var before = state.students;
     $('cgRaw').value = "번호\t이름\t희망 계열\t관심 계열\n" + lines.join("\n");
-    $('cgMap').hidden = true; mapState = null;
+    lastMap = m; mapState = null;
     $('cgParse').click();
-  });
+    if(state.students === before){ $('cgMap').hidden = true; return; }   // 바꾸기 취소
+    var hasField = state.students.some(function(s){ return s.field || s.field2; });
+    var found = COLS.filter(function(c){ return m.map[c.k] >= 0; }).map(function(c){ return c.label; }).join("·");
+    $('cgMap').innerHTML = '<h3>📄 '+esc(m.fileName)+'</h3><p class="cg-hint" style="margin:0 0 8px">'+state.students.length+'명을 불러왔어요 (자동 연결: '+esc(found)+'). '+
+      (hasField ? '희망 전공을 계열로 바꿨어요. 틀린 학생은 오른쪽 표에서 고치세요.' : '파일에 희망 전공 열이 없어서 <b>계열 칠하기 판</b>을 열었어요. 계열을 고르고 학생을 눌러 정하세요.')+'</p>'+
+      '<button type="button" class="action secondary small" data-remap>열 직접 고르기</button>';
+    $('cgMap').hidden = false;
+    if(!hasField){ $('cgNum').hidden = false; if(!paint && state.fields[0]) paint = state.fields[0].name; renderNumPanel(); }
+  }
   $('cgFileBtn').addEventListener('click', function(){ $('cgFile').click(); });
 
   /* ---------- 번호만으로 정하기 ---------- */
@@ -1979,10 +2010,15 @@
     $('cgPalette').innerHTML = state.fields.map(function(f){
       return '<button type="button" class="cg-pal'+(paint===f.name?' on':'')+'" data-pal="'+esc(f.name)+'">'+chip(f.name)+'</button>';
     }).join("") + '<button type="button" class="cg-pal'+(paint===""?' on':'')+'" data-pal="">'+chip("")+'</button>';
+    var named = state.students.some(function(s){ return !isNumOnly(s); });
+    $('cgNumGrid').classList.toggle('named', named);
+    $('cgNumTitle').textContent = named ? "🎨 계열 칠하기" : "🔢 번호만으로 정하기";
+    if(named) $('cgNumHint').textContent = '위에서 계열을 고르고, 그 계열을 희망하는 학생을 눌러 칠하세요. (예: "공학 희망 손 들어보세요" 하고 바로 누르기) 같은 색을 다시 누르면 미정으로 돌아가요. [번호판 만들기]를 누르면 이름 없는 번호판으로 바뀌어요.';
     var list = state.students.slice().sort(function(a,b){ return (parseInt(a.num,10)||0)-(parseInt(b.num,10)||0); });
     $('cgNumGrid').innerHTML = list.length ? list.map(function(s){
       var bg = s.field ? ' style="background:'+colorOf(s.field)+'"' : '';
-      return '<button type="button" class="cg-numcell'+(s.field?' set':'')+'"'+bg+' data-sid="'+s.id+'" title="'+esc(s.name)+'">'+esc(s.num)+'<small>'+esc(s.field||"미정")+'</small></button>';
+      var label = isNumOnly(s) ? esc(s.num) : esc(s.num)+' <span class="cg-cellname">'+esc(s.name)+'</span>';
+      return '<button type="button" class="cg-numcell'+(s.field?' set':'')+'"'+bg+' data-sid="'+s.id+'" title="'+esc(s.name)+'">'+label+'<small>'+esc(s.field||"미정")+'</small></button>';
     }).join("") : '<p class="cg-hint">총 인원을 넣고 [번호판 만들기]를 누르세요.</p>';
   }
   $('cgNumBtn').addEventListener('click', function(){
