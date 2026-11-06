@@ -645,6 +645,15 @@
   .cg-preview table{ font-size:.76rem; }
   .cg-preview th.on{ color:var(--accent); }
   .cg-major{ font-size:.72rem; color:var(--ink-muted); }
+  .cg-found{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:1rem; padding:10px 12px; border-radius:10px; background:var(--bg); border:1px solid var(--border); }
+  .cg-found .cg-chip{ font-size:.9rem; padding:3px 12px; }
+  .cg-sugg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .cg-sugg button{ font:inherit; font-size:.8rem; border:1px solid var(--border); background:var(--surface); color:var(--ink); border-radius:999px; padding:3px 10px; cursor:pointer; }
+  .cg-tax{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .cg-tax h4{ margin:0 0 4px; }
+  .cg-tax dl{ margin:0; font-size:.8rem; }
+  .cg-tax dt{ font-weight:700; margin-top:6px; }
+  .cg-tax dd{ margin:0; color:var(--ink-muted); line-height:1.5; }
   .cg-pal{ border:2px solid transparent; border-radius:999px; padding:3px; background:transparent; cursor:pointer; }
   .cg-pal.on{ border-color:var(--ink); }
   .cg-pal .cg-chip{ font-size:.82rem; padding:3px 11px; }
@@ -881,9 +890,20 @@
         <div class="cg-stats" id="cgStats"></div>
         <div id="cgParseWarn"></div>
         <div class="cg-table-wrap">
-          <table class="cg-table" id="cgStuTable"><thead><tr><th>번호</th><th>이름</th><th>희망 계열</th><th></th></tr></thead><tbody></tbody></table>
+          <table class="cg-table" id="cgStuTable"><thead><tr><th>번호</th><th>이름</th><th>희망 계열</th><th>중계열</th><th></th></tr></thead><tbody></tbody></table>
         </div>
       </div>
+    </div>
+
+    <div class="cg-card cg-noprint">
+      <h2>🔎 계열 찾기</h2>
+      <p class="cg-hint" style="margin-top:0">학과·전공·직업 이름을 입력하면 어느 계열(대계열 › 중계열)로 분류되는지 알려줘요. 분류는 학과(전공) 표준분류의 7개 대계열을 따라요.</p>
+      <input type="search" id="cgSearch" placeholder="예: 경영학과, 간호사, 군인, 게임 개발자" style="width:100%;font:inherit;font-size:1rem;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--ink)" autocomplete="off">
+      <div id="cgSearchOut" style="margin-top:10px"></div>
+      <details style="margin-top:8px">
+        <summary>전체 분류표 보기</summary>
+        <div id="cgTaxonomy" style="margin-top:10px"></div>
+      </details>
     </div>
 
     <div class="cg-card cg-noprint">
@@ -906,7 +926,7 @@
       </div>
       <details>
         <summary>계열 목록·인식 단어 고치기</summary>
-        <p class="cg-hint">같은 <b>그룹 번호</b>끼리는 가까운 계열로 보고 융합 모둠을 만들 때 먼저 묶어요.</p>
+        <p class="cg-hint">같은 <b>그룹 번호</b>끼리는 가까운 계열로 보고 융합 모둠을 만들 때 먼저 묶어요. 여기 인식 단어 칸에는 대계열을 가리키는 단어를 더 넣을 수 있어요. (학과별 단어는 위 🔎 전체 분류표에 있어요)</p>
         <div id="cgFieldList"></div>
         <div class="cg-row">
           <button type="button" class="action secondary small" id="cgAddField">+ 계열 추가</button>
@@ -1676,38 +1696,75 @@
 (function(){
   var STORE_KEY = 'career-groups-v1';
   var UNDECIDED_WORDS = /^(미정|미결정|모름|모르겠음|없음|고민중?|탐색중?|아직|\?+|-|x|X)$/;
+  /* 학과(전공) 분류 체계(한국교육개발원·대학교육협의회 표준분류)의 7개 대계열.
+     keys = 대계열 자체를 가리키는 단어(선생님이 고칠 수 있음), 중계열 단어는 SUBS에 */
   var DEFAULT_FIELDS = [
-    {name:"인문", color:"#D9480F", family:1, keys:"인문,문과,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역,문헌정보,고고,종교,신학,중문,중어,일문,일어,독문,독어,불문,불어,노어,서어,한문,문화인류,미학,인문학,문예,번역,작가,통역"},
-    {name:"사회", color:"#A6781A", family:2, keys:"사회,정치,외교,심리,미디어,신문방송,언론,광고,홍보,사회복지,정치외교,사회학,지리,국제,관광,호텔,항공서비스,승무원,비서,도시,커뮤니케이션,아동가족,소비자,기자,PD,아나운서,복지"},
-    {name:"상경", color:"#8B5A2B", family:2, keys:"상경,경상,경영,경제,회계,무역,금융,세무,마케팅,유통,물류,창업,부동산,은행,증권,보험,CEO,기업,경영학,경제학,회계사,세무사,펀드"},
-    {name:"법·행정", color:"#495057", family:2, keys:"법,법학,법대,법률,행정,행정학,경찰,경찰행정,소방,소방행정,공무원,변호사,검사,판사,군사,국방,군인,장교,교정,공공"},
-    {name:"교육", color:"#AE3EC9", family:1, keys:"교육,교대,사범,교사,유아교육,초등,특수교육,상담,교육과,교육학,교직,보육,사서교사,선생님,교원"},
-    {name:"자연", color:"#2F9E44", family:3, keys:"자연,이과,자연과학,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학,화학과,생명과학,생활과학,식품영양,영양,의류,동물,산림,원예,조경,지질,대기,천문우주,통계학,수리,물리학,연구원,농생명"},
-    {name:"공학", color:"#1C7ED6", family:3, keys:"공학,이공,이공계,공대,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,자동차,건설,산업공학,에너지,원자력,조선,해양공학,화학공학,생명공학,환경공학,식품공학,재료,시스템,통신,융합공학,드론,미래자동차,메카트로닉스,엔지니어,설계,배터리,우주"},
-    {name:"IT·SW", color:"#1098AD", family:3, keys:"IT,SW,소프트웨어,컴퓨터,컴공,컴퓨터공학,인공지능,AI,정보,정보보호,보안,데이터,빅데이터,개발,개발자,프로그래머,프로그래밍,코딩,게임,게임개발,전산,모바일,앱,웹,클라우드,정보통신"},
-    {name:"의약", color:"#C92A2A", family:4, keys:"의약,의학,의대,의예,의사,치의,치의예,치대,치과,치과의사,한의,한의예,한의사,약학,약대,약사,수의,수의사,수의예,제약,바이오의약"},
-    {name:"보건·간호", color:"#E64980", family:4, keys:"보건,간호,간호사,간호학,물리치료,작업치료,언어치료,임상,임상병리,방사선,응급구조,치위생,재활,안경광학,의료,병원,보건행정,치기공,의공"},
-    {name:"예체능", color:"#7048E8", family:5, keys:"예체능,예술,미술,음악,체육,디자인,연극,영화,무용,실용음악,스포츠,웹툰,애니,패션,사진,작곡,뷰티,요리,조리,연기,실용,성악,피아노,국악,회화,조소,산업디자인,시각디자인,실내디자인,영상,방송연예,모델,경호,태권도,운동,체육교육,만화,일러스트,메이크업,제과,바리스타,배우,가수,운동선수,e스포츠"}
+    {name:"인문",   color:"#D9480F", family:1, keys:"인문,문과"},
+    {name:"사회",   color:"#A6781A", family:1, keys:"사회"},
+    {name:"교육",   color:"#AE3EC9", family:1, keys:"교육,사범"},
+    {name:"공학",   color:"#1C7ED6", family:2, keys:"공학,공대,이공,이공계,엔지니어,설계,융합공학"},
+    {name:"자연",   color:"#2F9E44", family:2, keys:"자연,이과,자연과학,과학,연구원"},
+    {name:"의약",   color:"#C92A2A", family:2, keys:"의약"},
+    {name:"예체능", color:"#7048E8", family:3, keys:"예체능,예술"}
   ];
+  var SUBS = {
+    "인문": [
+      {name:"언어·문학", keys:"국어,국문,국어국문,영어,영문,영어영문,중국어,중문,중어,일본어,일문,일어,독어,독문,불어,불문,노어,서어,스페인어,외국어,어문,언어,언어학,문학,문예창작,문예,통번역,통역,번역,한문,작가"},
+      {name:"인문과학", keys:"인문학,사학,역사,철학,고고,종교,신학,문화인류,미학,문헌정보,사서"}],
+    "사회": [
+      {name:"경영·경제", keys:"상경,경상,경영,경제,회계,무역,금융,세무,마케팅,유통,물류,창업,부동산,은행,증권,보험,CEO,기업,회계사,세무사,관광,호텔,항공서비스,승무원,비서"},
+      {name:"법률", keys:"법,법학,법대,법률,변호사,검사,판사,경찰,경찰행정,소방,소방행정,교정"},
+      {name:"사회과학", keys:"정치,외교,정치외교,행정,행정학,공무원,공공,심리,미디어,신문방송,언론,광고,홍보,사회복지,복지,사회학,국제,도시,커뮤니케이션,아동가족,소비자,기자,PD,아나운서,군사,군사학,국방,군인,장교,부사관,사관학교,육군,해군,공군,해병"}],
+    "교육": [
+      {name:"교육일반", keys:"교육학,교직,교사,선생님,교원,교육과,상담"},
+      {name:"유아교육", keys:"유아교육,보육,유치원"},
+      {name:"특수교육", keys:"특수교육"},
+      {name:"초등교육", keys:"초등,교대,초등교육"},
+      {name:"중등교육", keys:"국어교육,영어교육,수학교육,과학교육,사회교육,역사교육,윤리교육,체육교육,음악교육,미술교육,기술교육,가정교육,컴퓨터교육,지리교육,물리교육,화학교육,생물교육,지구과학교육,중등"}],
+    "공학": [
+      {name:"건축", keys:"건축,건축공학,실내건축"},
+      {name:"토목·도시", keys:"토목,건설,도시공학,조경,해양공학"},
+      {name:"교통·운송", keys:"교통,항공운항,조종,파일럿,항해,운항,철도"},
+      {name:"기계·금속", keys:"기계,자동차,금속,미래자동차,메카트로닉스,로봇,조선,항공,항공우주,우주,드론"},
+      {name:"전기·전자", keys:"전기,전자,반도체,제어,전자공학"},
+      {name:"정밀·에너지", keys:"에너지,원자력,광학,정밀,배터리,이차전지"},
+      {name:"소재·재료", keys:"신소재,재료,소재,섬유,세라믹"},
+      {name:"컴퓨터·통신", keys:"컴퓨터,컴공,컴퓨터공학,소프트웨어,SW,IT,인공지능,AI,정보,정보보호,보안,데이터,빅데이터,개발,개발자,프로그래머,프로그래밍,코딩,게임,게임개발,전산,모바일,앱,웹,클라우드,정보통신,통신"},
+      {name:"산업", keys:"산업공학,경영공학,시스템,산업"},
+      {name:"화공", keys:"화공,화학공학,생명공학,환경공학,식품공학,고분자,바이오공학"}],
+    "자연": [
+      {name:"농림·수산", keys:"농업,농학,농생명,산림,원예,수산,해양,축산,동물자원,스마트팜,동물"},
+      {name:"생물·화학·환경", keys:"생명,생물,생명과학,화학,화학과,환경,미생물,유전,바이오"},
+      {name:"생활과학", keys:"식품,식품영양,영양,의류,생활과학,주거"},
+      {name:"수학·물리·천문·지리", keys:"수학,물리,물리학,천문,천문우주,지구과학,지질,대기,통계,통계학,수리,지리"}],
+    "의약": [
+      {name:"의료", keys:"의학,의대,의예,의사,치의,치의예,치대,치과,치과의사,한의,한의예,한의사,수의,수의사,수의예,의료"},
+      {name:"간호", keys:"간호,간호사,간호학"},
+      {name:"약학", keys:"약학,약대,약사,제약,바이오의약"},
+      {name:"치료·보건", keys:"보건,물리치료,작업치료,언어치료,임상,임상병리,방사선,응급구조,치위생,치기공,재활,안경광학,보건행정,의공,병원"}],
+    "예체능": [
+      {name:"디자인", keys:"디자인,시각디자인,산업디자인,실내디자인,패션디자인,패션"},
+      {name:"응용예술", keys:"사진,만화,애니,애니메이션,웹툰,영상,뷰티,메이크업,미용,공예,일러스트,조리,요리,제과,바리스타"},
+      {name:"무용·체육", keys:"무용,체육,스포츠,운동,태권도,경호,운동선수,e스포츠,댄스"},
+      {name:"미술·조형", keys:"미술,회화,조소,동양화,서양화,판화"},
+      {name:"연극·영화", keys:"연극,영화,연기,배우,방송연예,모델,뮤지컬"},
+      {name:"음악", keys:"음악,실용음악,작곡,성악,피아노,국악,가수,기악"}]
+  };
   var EXPLORE = "진로 탐색";
   var TOPICS = {
     "인문":["AI 번역 시대, 외국어 학습은 여전히 필요한가","신조어와 세대 간 소통의 변화","고전 문학 속 인물로 본 현대인의 고민","지역 방언 보존의 필요성과 방법","역사 왜곡 사례와 올바른 역사 인식"],
-    "사회":["가짜 뉴스 판별과 미디어 리터러시","플랫폼 노동과 노동자의 권리","저출생 대응 정책 비교 분석","다문화 사회와 공존","지역 소멸 문제와 해결 방안"],
-    "상경":["MZ세대의 소비 트렌드와 마케팅 전략","청소년 금융 이해력과 경제 교육","ESG 경영 사례 비교 분석","최저임금 인상이 지역 상권에 미치는 영향","플랫폼 기업의 성장과 독과점 문제"],
-    "법·행정":["촉법소년 연령 조정 논쟁","개인정보 보호와 공공 안전의 균형","AI 판사 도입은 가능할까","우리 지역 행정 서비스 개선 제안","청소년 참정권(선거 연령) 확대의 의미"],
-    "IT·SW":["생성형 AI가 바꾸는 직업 세계","청소년 스마트폰 사용 데이터 분석","개인정보 유출 사례와 보안 대책","알고리즘 추천의 편향 문제","우리 학교 문제를 해결하는 앱 기획"],
-    "보건·간호":["간호 인력 부족 문제와 해결 방안","청소년 정신 건강 관리 방안","고령화 사회의 돌봄과 재활","응급의료 체계의 지역 격차","올바른 약 복용과 보건 교육"],
+    "사회":["가짜 뉴스 판별과 미디어 리터러시","플랫폼 노동과 노동자의 권리","저출생 대응 정책 비교 분석","다문화 사회와 공존","지역 소멸 문제와 해결 방안","MZ세대의 소비 트렌드와 마케팅 전략","청소년 금융 이해력과 경제 교육","ESG 경영 사례 비교 분석","최저임금 인상이 지역 상권에 미치는 영향","플랫폼 기업의 성장과 독과점 문제","촉법소년 연령 조정 논쟁","개인정보 보호와 공공 안전의 균형","AI 판사 도입은 가능할까","우리 지역 행정 서비스 개선 제안","청소년 참정권(선거 연령) 확대의 의미"],
     "교육":["AI 디지털 교과서의 장단점","고교학점제와 진로 선택","학교 폭력 예방 프로그램 비교","에듀테크가 바꾸는 미래 교실","다문화 학생을 위한 교육 지원"],
     "자연":["기후 위기와 우리 지역 생태계 변화","미세플라스틱이 생물에 미치는 영향","유전자 가위 기술의 가능성과 윤리","대체 식품(배양육·곤충식)의 미래","우리 학교 에너지 사용량 분석"],
-    "공학":["자율주행차 사고의 책임은 누구에게","신재생 에너지 기술 비교","스마트시티와 미래 교통","반도체 산업과 국가 경쟁력","2차전지 기술과 재활용"],
-    "의약":["감염병 대응과 공중보건 시스템","원격 의료 도입 찬반","신약 개발 과정과 임상시험 윤리","의대 정원과 지역 의료 격차","항생제 내성 문제"],
+    "공학":["생성형 AI가 바꾸는 직업 세계","청소년 스마트폰 사용 데이터 분석","개인정보 유출 사례와 보안 대책","알고리즘 추천의 편향 문제","우리 학교 문제를 해결하는 앱 기획","자율주행차 사고의 책임은 누구에게","신재생 에너지 기술 비교","스마트시티와 미래 교통","반도체 산업과 국가 경쟁력","2차전지 기술과 재활용"],
+    "의약":["간호 인력 부족 문제와 해결 방안","청소년 정신 건강 관리 방안","고령화 사회의 돌봄과 재활","응급의료 체계의 지역 격차","올바른 약 복용과 보건 교육","감염병 대응과 공중보건 시스템","원격 의료 도입 찬반","신약 개발 과정과 임상시험 윤리","의대 정원과 지역 의료 격차","항생제 내성 문제"],
     "예체능":["AI 창작물의 저작권은 누구에게","K-콘텐츠의 세계화 전략","스포츠 속 과학과 데이터 분석","유니버설 디자인 사례 탐구","공연 예술의 디지털 전환"],
     "진로 탐색":["10년 후 새로 생길 직업과 사라질 직업","모둠원 관심 직업 3가지 비교 탐색","이름은 비슷하지만 다른 학과 비교하기","나의 강점·흥미 검사로 어울리는 계열 찾기","우리 지역 직업인 인터뷰 보고서"]
   };
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
   var state = {
-    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS), keysVersion:4,
+    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS), keysVersion:5,
     settings:{min:2, max:5, target:4, undecided:"explore", use2nd:false, roles:true, roleList:"모둠장, 자료조사, 보고서 작성, 발표, 시각자료(PPT)"}
   };
   function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -1716,24 +1773,23 @@
     if(saved && saved.students){
       var st = Object.assign({}, state.settings, saved.settings);
       state = Object.assign(state, saved); state.settings = st;
-      if((saved.keysVersion||1) < 3){
-        // 새 계열 목록으로 바꾸고, 선생님이 직접 추가한 계열은 뒤에 남김
-        var oldNames = ["인문","사회","교육","자연","공학","의약","예체능"];
+      if((saved.keysVersion||1) < 5){
+        // 공식 7개 대계열로 바꾸고, 선생님이 직접 추가한 계열은 뒤에 남김
+        var oldNames = ["인문","사회","교육","자연","공학","의약","예체능","상경","법·행정","IT·SW","보건·간호"];
         var custom = state.fields.filter(function(f){ return oldNames.indexOf(f.name) < 0 && !DEFAULT_FIELDS.some(function(d){ return d.name===f.name; }); });
         state.fields = clone(DEFAULT_FIELDS).concat(custom);
-      }
-      if((saved.keysVersion||1) < 4){
-        state.fields.forEach(function(f){
-          var d = DEFAULT_FIELDS.filter(function(x){ return x.name===f.name; })[0]; if(!d) return;
-          var have = f.keys.split(",").map(function(k){ return k.trim(); });
-          d.keys.split(",").forEach(function(k){ if(have.indexOf(k)<0) have.push(k); });
-          f.keys = have.filter(Boolean).join(",");
-        });
+        var MOVE = {"상경":["사회","경영·경제"], "법·행정":["사회","법률"], "IT·SW":["공학","컴퓨터·통신"], "보건·간호":["의약",""]};
+        var fix = function(x){
+          if(MOVE[x.field]){ x.sub = MOVE[x.field][1]; x.field = MOVE[x.field][0]; }
+          if(x.major){ var c = classify(x.major); if(c.field === x.field && c.sub) x.sub = c.sub; }
+        };
+        state.students.forEach(fix);
+        state.groups.forEach(function(g){ g.members.forEach(fix); });
       }
       if(state.settings.undecided === "interest") state.settings.undecided = "explore";
       state.students.forEach(function(s){ s.field2 = ""; s.major2 = ""; });
     }
-    state.keysVersion = 4;
+    state.keysVersion = 5;
   }catch(e){}
 
   function $(id){ return document.getElementById(id); }
@@ -1754,20 +1810,31 @@
   /* 모둠 성격을 정하는 계열 = 희망 계열 */
   function effField(s){ return s.field || s.field2 || ""; }
 
-  function normalizeField(txt){
-    if(txt == null) return "";
-    var t = String(txt).replace(/\s|계열/g, "");
-    if(!t || UNDECIDED_WORDS.test(t)) return "";
-    var best = "", bestLen = 0;
+  /* 단어 → {field 대계열, sub 중계열, key 맞은 단어}. 가장 길게 맞는 단어가 이김 */
+  function classify(txt){
+    var none = {field:"", sub:"", key:""};
+    if(txt == null) return none;
+    var t = String(txt).replace(/\s|계열/g, "").toUpperCase();
+    if(!t || UNDECIDED_WORDS.test(t)) return none;
+    var best = none, bestLen = 0;
+    function test(k, field, sub){
+      k = k.trim(); if(!k) return;
+      var K = k.toUpperCase().replace(/\s/g,"");
+      var len = (t === K) ? 999 + K.length : (t.indexOf(K) >= 0 ? K.length : 0);
+      if(len > bestLen || (len && len === bestLen && sub && !best.sub)){ bestLen = len; best = {field:field, sub:sub, key:k}; }
+    }
     state.fields.forEach(function(f){
-      if(t === f.name){ best = f.name; bestLen = 999; }
-      [f.name].concat(f.keys.split(",")).forEach(function(k){
-        k = k.trim(); if(!k) return;
-        if(t.toUpperCase().indexOf(k.toUpperCase()) >= 0 && k.length > bestLen){ best = f.name; bestLen = k.length; }
+      [f.name].concat(f.keys.split(",")).forEach(function(k){ test(k, f.name, ""); });
+      (SUBS[f.name] || []).forEach(function(sb){
+        test(sb.name.replace(/·/g,""), f.name, sb.name);
+        test(sb.name, f.name, sb.name);
+        sb.keys.split(",").forEach(function(k){ test(k, f.name, sb.name); });
       });
     });
     return best;
   }
+  function normalizeField(txt){ return classify(txt).field; }
+  function subsOf(field){ return SUBS[field] || []; }
 
   /* ---------- 학생 입력 ---------- */
   /* 원문이 계열 이름과 다를 때만(예: "컴퓨터공학과") 보관해서 보여줌 */
@@ -1783,7 +1850,9 @@
     var t = String(v==null?"":v).replace(/\s|계열/g,"");
     if(!t || UNDECIDED_WORDS.test(t)) return true;
     return state.fields.some(function(f){
-      return [f.name].concat(f.keys.split(",")).some(function(k){ k = k.trim(); return k && (t===k || t===k+"과" || t===k+"학과" || t===k+"학"); });
+      var ks = [f.name].concat(f.keys.split(","));
+      subsOf(f.name).forEach(function(sb){ ks = ks.concat(sb.name, sb.keys.split(",")); });
+      return ks.some(function(k){ k = k.trim(); return k && (t===k || t===k+"과" || t===k+"학과" || t===k+"학"); });
     });
   }
   function parseRaw(text){
@@ -1799,9 +1868,9 @@
       else if(/^\d+$/.test(cols[0])){ num=cols[0]; name=cols[1] || numName(num); f1=cols[2]; f2=cols[3]; }
       else { num=String(out.length+1); name=cols[0]; f1=cols[1]; f2=cols[2]; }
       if(!name) return;
-      f2 = ""; var n1 = normalizeField(f1), n2 = "";
+      f2 = ""; var c1 = classify(f1), n1 = c1.field, n2 = "";
       var unknown = !!(f1 && !n1 && !UNDECIDED_WORDS.test(String(f1).replace(/\s|계열/g,"")));
-      out.push({id:newId(), num:num, name:name, field:n1, field2:(n2 && n2!==n1)?n2:"", rawField: unknown ? f1 : "",
+      out.push({id:newId(), num:num, name:name, field:n1, sub:c1.sub, field2:"", rawField: unknown ? f1 : "",
                 major: majorText(f1, n1), major2: majorText(f2, n2)});
     });
     return out;
@@ -1814,6 +1883,7 @@
       var mj = s.major || "";
       return '<tr data-id="'+s.id+'"><td>'+esc(s.num)+'</td><td>'+esc(s.name)+(mj?'<br><span class="cg-major">'+esc(mj)+'</span>':'')+'</td>'+
         '<td><select data-k="field">'+fieldOptions(s.field,"미정")+'</select></td>'+
+        '<td>'+(subsOf(s.field).length ? '<select data-k="sub"><option value="">-</option>'+subsOf(s.field).map(function(sb){ return '<option'+(sb.name===s.sub?' selected':'')+'>'+esc(sb.name)+'</option>'; }).join("")+'</select>' : '')+'</td>'+
         '<td><button type="button" class="cg-x" data-del title="삭제">✕</button></td></tr>';
     }).join("");
     $('cgStuCount').textContent = state.students.length ? "("+state.students.length+"명)" : "";
@@ -1833,7 +1903,8 @@
     var tr = e.target.closest('tr'); if(!tr) return;
     var s = state.students.filter(function(x){ return x.id===tr.dataset.id; })[0];
     s[e.target.dataset.k] = e.target.value; s.rawField = "";
-    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field=s.field; m.field2=s.field2; } }); });
+    if(e.target.dataset.k === "field") s.sub = "";
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field=s.field; m.sub=s.sub; } }); });
     save(); renderStudents(); renderGroups();
   });
   $('cgStuTable').addEventListener('click', function(e){
@@ -2055,8 +2126,8 @@
     var s = state.students.filter(function(x){ return x.id===b.dataset.sid; })[0]; if(!s) return;
     s.field = (s.field === paint) ? "" : paint;      // 같은 색 다시 누르면 미정
     if(s.field2 === s.field) s.field2 = "";
-    s.rawField = ""; s.major = "";
-    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field = s.field; m.field2 = s.field2; m.major = ""; } }); });
+    s.rawField = ""; s.major = ""; s.sub = "";
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ if(m.id===s.id){ m.field = s.field; m.sub = ""; m.major = ""; } }); });
     save(); renderStudents(); renderNumPanel();
   });
   $('cgFile').addEventListener('change', function(e){
@@ -2084,7 +2155,7 @@
   });
   $('cgSample').addEventListener('click', function(){
     var names = "김민준,이서연,박지호,최서윤,정도윤,강하은,조예준,윤지우,장시우,임수아,한주원,오지민,서건우,신채원,권현우,황다은,안유준,송서현,류은우,홍하린,전지환,고나은,문도현,양소율,배준서,백예린,허민재,남가윤".split(",");
-    var rows = ["공학","공학","공대 기계","IT·SW","컴퓨터공학","게임개발","의약","약학","간호","물리치료","자연","생명과학","경영","경제","회계","사회","심리학","법학","경찰행정","인문","교육","교대","예체능","체육","미정","미정","미정",""];
+    var rows = ["기계공학과","전자공학","공대","소프트웨어","컴퓨터공학","게임개발","의예과","약학","간호학과","물리치료","생명과학","수학","경영학과","경제","회계","심리학","정치외교","법학","경찰행정","영어영문","사학","초등교육","교대","체육","실용음악","미정","미정",""];
     rows = shuffle(rows);
     $('cgRaw').value = "번호\t이름\t희망 계열\n" + names.map(function(n,i){ return (i+1)+"\t"+n+"\t"+rows[i]; }).join("\n");
     say("예시 데이터를 넣었습니다. [붙여넣은 명단 불러오기]를 누르세요.");
@@ -2095,8 +2166,51 @@
     save(); renderStudents(); renderGroups();
   });
 
+  /* ---------- 계열 찾기 ---------- */
+  function allWords(){
+    var out = [];
+    state.fields.forEach(function(f){
+      [f.name].concat(f.keys.split(",")).forEach(function(k){ k = k.trim(); if(k) out.push({k:k, field:f.name, sub:""}); });
+      subsOf(f.name).forEach(function(sb){
+        out.push({k:sb.name, field:f.name, sub:sb.name});
+        sb.keys.split(",").forEach(function(k){ k = k.trim(); if(k) out.push({k:k, field:f.name, sub:sb.name}); });
+      });
+    });
+    return out;
+  }
+  function pathHtml(field, sub){ return chip(field) + (sub ? ' <b>›</b> <span>'+esc(sub)+'</span>' : ''); }
+  function runSearch(){
+    var q = $('cgSearch').value.trim(), out = $('cgSearchOut');
+    if(!q){ out.innerHTML = ""; return; }
+    var c = classify(q), html = "";
+    if(UNDECIDED_WORDS.test(q.replace(/\s/g,""))) html = '<div class="cg-found">'+chip("")+' 진로 미정으로 처리돼요.</div>';
+    else if(c.field) html = '<div class="cg-found"><span>“'+esc(q)+'” →</span> '+pathHtml(c.field, c.sub)+' <span class="cg-major">(인식 단어: '+esc(c.key)+')</span></div>';
+    else html = '<div class="cg-found">“'+esc(q)+'”은(는) 아직 분류표에 없어요. 아래 비슷한 단어를 고르거나, ② 모둠 규칙 › 계열 목록에서 인식 단어로 추가하세요.</div>';
+    // 비슷한 단어
+    var Q = q.replace(/\s/g,"").toUpperCase().replace(/(학과|학부|과|계열)$/,"");
+    var seen = {}, sugg = allWords().filter(function(w){
+      var K = w.k.toUpperCase();
+      if(!Q || seen[w.k] || K === c.key.toUpperCase()) return false;
+      var hit = K.indexOf(Q) >= 0 || (Q.length >= 2 && Q.indexOf(K) >= 0 && K.length >= 2);
+      if(hit) seen[w.k] = 1; return hit;
+    }).slice(0, 14);
+    if(sugg.length) html += '<div class="cg-sugg">'+sugg.map(function(w){ return '<button type="button" data-q="'+esc(w.k)+'">'+esc(w.k)+' → '+esc(w.sub || w.field)+'</button>'; }).join("")+'</div>';
+    out.innerHTML = html;
+  }
+  $('cgSearch').addEventListener('input', runSearch);
+  $('cgSearchOut').addEventListener('click', function(e){ var b = e.target.closest('[data-q]'); if(b){ $('cgSearch').value = b.dataset.q; runSearch(); } });
+  function renderTaxonomy(){
+    $('cgTaxonomy').innerHTML = '<div class="cg-tax">'+state.fields.map(function(f){
+      var subs = subsOf(f.name);
+      return '<div><h4>'+chip(f.name)+'</h4><dl>'+
+        (subs.length ? subs.map(function(sb){ return '<dt>'+esc(sb.name)+'</dt><dd>'+esc(sb.keys.split(",").join(", "))+'</dd>'; }).join("") : '')+
+        '<dt>그 밖의 인식 단어</dt><dd>'+esc(f.keys.split(",").join(", ") || "-")+'</dd></dl></div>';
+    }).join("")+'</div><p class="cg-hint">대계열·중계열 이름은 학과(전공) 표준분류(한국교육개발원·한국대학교육협의회)를 따랐어요. 학과를 어느 중계열에 넣을지는 대학마다 조금씩 다를 수 있어요.</p>';
+  }
+
   /* ---------- 설정 ---------- */
   function renderSettings(){
+    renderTaxonomy(); if($('cgSearch').value) runSearch();
     var S = state.settings;
     $('cgMin').value=S.min; $('cgMax').value=S.max; $('cgTarget').value=S.target;
     $('cgUndecided').value=S.undecided; $('cgRoles').checked=S.roles; $('cgRoleList').value=S.roleList;
@@ -2157,13 +2271,18 @@
     arr.forEach(function(x,i){ out[i%k].push(x); });
     return out;
   }
+  function chunkContig(arr, k){
+    var out = [], n = arr.length, at = 0;
+    for(var i=0;i<k;i++){ var size = Math.floor(n/k) + (i < n%k ? 1 : 0); out.push(arr.slice(at, at+size)); at += size; }
+    return out;
+  }
   function famOf(name){ var f = fieldOf(name); return f ? f.family : 99; }
 
   function makeGroups(){
     readSettings();
     var S = state.settings;
     if(!state.students.length){ alert("먼저 ① 학생 명단을 불러오세요."); return; }
-    var studs = state.students.map(function(s){ return {id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, major:s.major||"", major2:s.major2||"", role:""}; });
+    var studs = state.students.map(function(s){ return {id:s.id, num:s.num, name:s.name, field:s.field, sub:s.sub||"", field2:"", major:s.major||"", role:""}; });
     var groups = [], leftovers = [], explore = [], spread = [];
 
     // 미정 학생 분류
@@ -2182,7 +2301,9 @@
     state.fields.forEach(function(f){
       var list = shuffle(pools[f.name] || []);
       if(!list.length) return;
-      if(list.length >= S.min) chunkEven(list, splitCount(list.length, S)).forEach(function(m){ groups.push({kind:"field", fields:[f.name], members:m}); });
+      // 같은 중계열(예: 경영·경제)끼리 이웃하게 정렬한 뒤 차례로 잘라서 같은 모둠이 되게
+      list.sort(function(a,b){ return (a.sub||"~").localeCompare(b.sub||"~"); });
+      if(list.length >= S.min) chunkContig(list, splitCount(list.length, S)).forEach(function(m){ groups.push({kind:"field", fields:[f.name], members:m}); });
       else leftovers = leftovers.concat(list);
     });
     function room(g){ return S.max - g.members.length; }
@@ -2259,14 +2380,18 @@
     groups.forEach(function(g){
       var fs = uniq(g.members.map(effField));
       if(g.kind==="explore") g.base = EXPLORE;
-      else if(fs.length===1) g.base = fs[0];
+      else if(fs.length===1){
+        var subs = uniq(g.members.map(function(m){ return m.sub; }));
+        g.base = fs[0] + (subs.length===1 && g.members.every(function(m){ return m.sub; }) ? "(" + subs[0] + ")" : "");
+      }
       else if(fs.length>1) g.base = "융합(" + fs.join("·") + ")";
       else g.base = EXPLORE;
       total[g.base] = (total[g.base]||0) + 1;
     });
     groups.sort(function(a,b){
-      var ia = a.base===EXPLORE ? 999 : (fieldOf(a.base) ? state.fields.indexOf(fieldOf(a.base)) : 500);
-      var ib = b.base===EXPLORE ? 999 : (fieldOf(b.base) ? state.fields.indexOf(fieldOf(b.base)) : 500);
+      var fa = fieldOf(a.base.replace(/\(.*$/,"")), fb = fieldOf(b.base.replace(/\(.*$/,""));
+      var ia = a.base===EXPLORE ? 999 : (fa ? state.fields.indexOf(fa) : 500);
+      var ib = b.base===EXPLORE ? 999 : (fb ? state.fields.indexOf(fb) : 500);
       return ia - ib;
     });
     state.groups = groups.map(function(g, i){
@@ -2313,7 +2438,7 @@
           var opts = roles.map(function(r){ return '<option'+(r===m.role?' selected':'')+'>'+esc(r)+'</option>'; }).join("");
           if(m.role && roles.indexOf(m.role)<0) opts += '<option selected>'+esc(m.role)+'</option>';
           opts += '<option value=""'+(m.role?'':' selected')+'>-</option>';
-          var sub = m.major ? esc(m.major) : '';
+          var sub = [m.sub, m.major].filter(Boolean).map(esc).join(" · ");
           if(sub) sub = '<br><span class="cg-f2">'+sub+'</span>';
           var nameHtml = isNumOnly(m) ? '<b>'+esc(m.name)+'</b>' : esc(m.name);
           return '<div class="cg-member" draggable="true" data-m="'+m.id+'">'+(isNumOnly(m) ? '' : '<span class="cg-num">'+esc(m.num)+'</span>')+
@@ -2379,7 +2504,7 @@
     var placed = {}; state.groups.forEach(function(g){ g.members.forEach(function(m){ placed[m.id]=1; }); });
     state.students.filter(function(s){ return !placed[s.id]; }).forEach(function(s){
       var g = state.groups.slice().sort(function(a,b){ return a.members.length-b.members.length; })[0];
-      if(g) g.members.push({id:s.id, num:s.num, name:s.name, field:s.field, field2:s.field2, major:s.major||"", major2:s.major2||"", role:"공동 조사"});
+      if(g) g.members.push({id:s.id, num:s.num, name:s.name, field:s.field, sub:s.sub||"", field2:"", major:s.major||"", role:"공동 조사"});
     });
     save(); renderGroups();
   });
@@ -2396,8 +2521,8 @@
   window.addEventListener('afterprint', function(){ document.body.classList.remove('cg-printing'); });
   $('cgCSV').addEventListener('click', function(){
     if(!state.groups.length){ alert("먼저 모둠을 만들어 주세요."); return; }
-    var rows = [["모둠","보고서 주제","번호","이름","희망 계열","희망 전공(원문)","역할"]];
-    state.groups.forEach(function(g){ g.members.forEach(function(m){ rows.push([g.title, g.topic, m.num, m.name, m.field||"미정", m.major||"", m.role]); }); });
+    var rows = [["모둠","보고서 주제","번호","이름","대계열","중계열","희망 전공(원문)","역할"]];
+    state.groups.forEach(function(g){ g.members.forEach(function(m){ rows.push([g.title, g.topic, m.num, m.name, m.field||"미정", m.sub||"", m.major||"", m.role]); }); });
     var csv = "﻿" + rows.map(function(r){ return r.map(function(c){ return '"' + String(c==null?"":c).replace(/"/g,'""') + '"'; }).join(","); }).join("\r\n");
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
