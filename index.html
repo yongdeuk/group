@@ -1677,13 +1677,13 @@
   var STORE_KEY = 'career-groups-v1';
   var UNDECIDED_WORDS = /^(미정|미결정|모름|모르겠음|없음|고민중?|탐색중?|아직|\?+|-|x|X)$/;
   var DEFAULT_FIELDS = [
-    {name:"인문", color:"#D9480F", family:1, keys:"인문,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역,문헌정보,고고,종교,신학,중문,중어,일문,일어,독문,독어,불문,불어,노어,서어,한문,문화인류,미학,인문학,문예,번역,작가,통역"},
+    {name:"인문", color:"#D9480F", family:1, keys:"인문,문과,국문,국어,영문,영어,사학,역사,철학,어문,문학,외국어,언어,문예창작,통번역,문헌정보,고고,종교,신학,중문,중어,일문,일어,독문,독어,불문,불어,노어,서어,한문,문화인류,미학,인문학,문예,번역,작가,통역"},
     {name:"사회", color:"#A6781A", family:2, keys:"사회,정치,외교,심리,미디어,신문방송,언론,광고,홍보,사회복지,정치외교,사회학,지리,국제,관광,호텔,항공서비스,승무원,비서,도시,커뮤니케이션,아동가족,소비자,기자,PD,아나운서,복지"},
     {name:"상경", color:"#8B5A2B", family:2, keys:"상경,경상,경영,경제,회계,무역,금융,세무,마케팅,유통,물류,창업,부동산,은행,증권,보험,CEO,기업,경영학,경제학,회계사,세무사,펀드"},
     {name:"법·행정", color:"#495057", family:2, keys:"법,법학,법대,법률,행정,행정학,경찰,경찰행정,소방,소방행정,공무원,변호사,검사,판사,군사,국방,군인,장교,교정,공공"},
     {name:"교육", color:"#AE3EC9", family:1, keys:"교육,교대,사범,교사,유아교육,초등,특수교육,상담,교육과,교육학,교직,보육,사서교사,선생님,교원"},
-    {name:"자연", color:"#2F9E44", family:3, keys:"자연,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학,화학과,생명과학,생활과학,식품영양,영양,의류,동물,산림,원예,조경,지질,대기,천문우주,통계학,수리,물리학,연구원,농생명"},
-    {name:"공학", color:"#1C7ED6", family:3, keys:"공학,공대,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,자동차,건설,산업공학,에너지,원자력,조선,해양공학,화학공학,생명공학,환경공학,식품공학,재료,시스템,통신,융합공학,드론,미래자동차,메카트로닉스,엔지니어,설계,배터리,우주"},
+    {name:"자연", color:"#2F9E44", family:3, keys:"자연,이과,자연과학,수학,물리,화학,생명,생물,지구과학,천문,통계,환경,농업,식품,해양,과학,화학과,생명과학,생활과학,식품영양,영양,의류,동물,산림,원예,조경,지질,대기,천문우주,통계학,수리,물리학,연구원,농생명"},
+    {name:"공학", color:"#1C7ED6", family:3, keys:"공학,이공,이공계,공대,전자,전기,기계,건축,토목,화공,신소재,항공,로봇,반도체,자동차,건설,산업공학,에너지,원자력,조선,해양공학,화학공학,생명공학,환경공학,식품공학,재료,시스템,통신,융합공학,드론,미래자동차,메카트로닉스,엔지니어,설계,배터리,우주"},
     {name:"IT·SW", color:"#1098AD", family:3, keys:"IT,SW,소프트웨어,컴퓨터,컴공,컴퓨터공학,인공지능,AI,정보,정보보호,보안,데이터,빅데이터,개발,개발자,프로그래머,프로그래밍,코딩,게임,게임개발,전산,모바일,앱,웹,클라우드,정보통신"},
     {name:"의약", color:"#C92A2A", family:4, keys:"의약,의학,의대,의예,의사,치의,치의예,치대,치과,치과의사,한의,한의예,한의사,약학,약대,약사,수의,수의사,수의예,제약,바이오의약"},
     {name:"보건·간호", color:"#E64980", family:4, keys:"보건,간호,간호사,간호학,물리치료,작업치료,언어치료,임상,임상병리,방사선,응급구조,치위생,재활,안경광학,의료,병원,보건행정,치기공,의공"},
@@ -1707,7 +1707,7 @@
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
   var state = {
-    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS), keysVersion:3,
+    raw:"", students:[], groups:[], fields: clone(DEFAULT_FIELDS), keysVersion:4,
     settings:{min:2, max:5, target:4, undecided:"explore", use2nd:false, roles:true, roleList:"모둠장, 자료조사, 보고서 작성, 발표, 시각자료(PPT)"}
   };
   function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
@@ -1722,10 +1722,18 @@
         var custom = state.fields.filter(function(f){ return oldNames.indexOf(f.name) < 0 && !DEFAULT_FIELDS.some(function(d){ return d.name===f.name; }); });
         state.fields = clone(DEFAULT_FIELDS).concat(custom);
       }
+      if((saved.keysVersion||1) < 4){
+        state.fields.forEach(function(f){
+          var d = DEFAULT_FIELDS.filter(function(x){ return x.name===f.name; })[0]; if(!d) return;
+          var have = f.keys.split(",").map(function(k){ return k.trim(); });
+          d.keys.split(",").forEach(function(k){ if(have.indexOf(k)<0) have.push(k); });
+          f.keys = have.filter(Boolean).join(",");
+        });
+      }
       if(state.settings.undecided === "interest") state.settings.undecided = "explore";
       state.students.forEach(function(s){ s.field2 = ""; s.major2 = ""; });
     }
-    state.keysVersion = 3;
+    state.keysVersion = 4;
   }catch(e){}
 
   function $(id){ return document.getElementById(id); }
